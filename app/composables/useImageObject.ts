@@ -33,19 +33,22 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
     imageData: ImageDataObject,
     mouseX: number,
     mouseY: number,
-    eraseRadius: number
+    eraseRadius: number,
+    isNewPath: boolean = false
   ) => {
-    const lastPath = imageData.erasePaths[imageData.erasePaths.length - 1];
-    ctx.globalCompositeOperation = "destination-out"; // 描画した部分を削除するためのモードに設定
+    ctx.globalCompositeOperation = "destination-out";
 
-    if (lastPath) {
-      ctx.beginPath();
-      ctx.moveTo(lastPath.endX, lastPath.endY);
-      ctx.lineTo(mouseX, mouseY);
-      ctx.lineWidth = eraseRadius * 2;
-      ctx.lineJoin = "round";
-      ctx.lineCap = "round";
-      ctx.stroke();
+    if (!isNewPath) {
+      const lastPath = imageData.erasePaths[imageData.erasePaths.length - 1];
+      if (lastPath) {
+        ctx.beginPath();
+        ctx.moveTo(lastPath.endX, lastPath.endY);
+        ctx.lineTo(mouseX, mouseY);
+        ctx.lineWidth = eraseRadius * 2;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.stroke();
+      }
     }
 
     ctx.beginPath();
@@ -53,8 +56,12 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
     ctx.fill();
 
     imageData.erasePaths.push({
-      startX: lastPath ? lastPath.endX : mouseX,
-      startY: lastPath ? lastPath.endY : mouseY,
+      startX: isNewPath
+        ? mouseX
+        : imageData.erasePaths[imageData.erasePaths.length - 1]?.endX ?? mouseX,
+      startY: isNewPath
+        ? mouseY
+        : imageData.erasePaths[imageData.erasePaths.length - 1]?.endY ?? mouseY,
       endX: mouseX,
       endY: mouseY,
     });

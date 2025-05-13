@@ -14,7 +14,11 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
   // 画像の再描画
   const redraw = (imageData: ImageDataObject) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(imageData.img, 0, 0, imageData.width, imageData.height);
+
+    // 消去パスの描画
+    ctx.globalCompositeOperation = "destination-out";
     imageData.erasePaths.forEach((path: ErasePath) => {
       ctx.beginPath();
       ctx.moveTo(path.startX, path.startY);
@@ -25,6 +29,8 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
       ctx.stroke();
     });
 
+    // 描画モードを元に戻す
+    ctx.globalCompositeOperation = "source-over";
     return imageData;
   };
 
@@ -69,14 +75,23 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
 
   // 消去処理後の画像をサムネイルとして取得する関数
   const getThumbnail = (): string => {
-    return ctx.canvas.toDataURL("image/png"); // canvasの内容を画像データURLに変換
+    return ctx.canvas.toDataURL("image/png");
   };
 
   // 編集後DataURLを設定する関数
   const updateEditedDataURL = (imageData: ImageDataObject) => {
-    imageData.img.src = getThumbnail(); // 画像のsrcを更新
-    imageData.editedDataUrl = getThumbnail();
-    return imageData;
+    const dataUrl = getThumbnail();
+    imageData.editedDataUrl = dataUrl;
+
+    // 新しい画像オブジェクトを作成せず、既存のsrcを更新
+    return new Promise<void>((resolve) => {
+      const tempImg = new Image();
+      tempImg.onload = () => {
+        imageData.img = tempImg;
+        resolve();
+      };
+      tempImg.src = dataUrl;
+    });
   };
 
   return {

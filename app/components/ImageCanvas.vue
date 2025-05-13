@@ -70,12 +70,12 @@ const handleErase = (
 };
 
 // 編集後の画像を親コンポーネントに返す
-const saveEdits = () => {
-  if (!ctx.value) return; // コンテキストが取得できない場合は処理を中止
-  if (!originData.value) return; // 元データが存在しない場合は処理を中止
+const saveEdits = async () => {
+  if (!ctx.value || !originData.value) return;
 
   const { updateEditedDataURL } = useImageObject(ctx.value);
-  emit("save", updateEditedDataURL(originData.value)); // 編集後の画像オブジェクトを親に送信
+  await updateEditedDataURL(originData.value);
+  emit("save", originData.value);
 };
 
 // モーダルを閉じる処理
@@ -211,23 +211,23 @@ const startErase = () => {
 onMounted(() => {
   ctx.value = canvasRef.value?.getContext("2d") || null;
 
-  // キャンバスのコンテキストが取得できない場合はエラー
   if (!ctx.value) {
     console.error("Failed to get canvas context");
     return;
   }
 
-  // 元データをクローン
-  originData.value = JSON.parse(JSON.stringify(props.imageObj));
-  if (!originData.value) return; // 元データが存在しない場合は処理を中止
-  originData.value.img = props.imageObj.img; // 画像オブジェクトを設定
+  // 元データを参照として保持し、erasePaths配列のみ新しく作成
+  originData.value = {
+    ...props.imageObj,
+    erasePaths: [...props.imageObj.erasePaths],
+  };
 
   const { initCanvas, redraw } = useImageObject(ctx.value);
-  initCanvas(originData.value); // キャンバスの初期化
-  redraw(originData.value); // 初期描画
+  initCanvas(originData.value);
+  redraw(originData.value);
 
   if (canvasRef.value) {
-    startErase(); // 消去処理を初期化
+    startErase();
   }
 });
 </script>

@@ -19,11 +19,17 @@
         <v-slider v-model="eraseRadius" @change="updateEraseSize"></v-slider>
       </div>
     </v-card-text>
-    <v-card-text>
+    <v-card-text class="canvas-container pa-0">
       <canvas
         ref="canvasRef"
         :width="canvasWidth"
         :height="canvasHeight"
+        :style="{
+          width: `${canvasWidth}px`,
+          height: `${canvasHeight}px`,
+          display: 'block',
+          margin: '0 auto',
+        }"
       ></canvas>
     </v-card-text>
     <v-card-actions>
@@ -207,6 +213,14 @@ const startErase = () => {
   });
 };
 
+// キャンバスのサイズが変更されたときに再描画
+watch([() => props.canvasWidth, () => props.canvasHeight], () => {
+  if (ctx.value && originData.value) {
+    const { redraw } = useImageObject(ctx.value);
+    redraw(originData.value);
+  }
+});
+
 // キャンバス描画の初期化
 onMounted(() => {
   ctx.value = canvasRef.value?.getContext("2d") || null;
@@ -239,5 +253,11 @@ canvas {
 .erase-cursor {
   cursor: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"%3E%3Ccircle cx="25" cy="25" r="25" fill="rgba(0, 0, 0, 0.5)" /%3E%3C/svg%3E'),
     auto;
+}
+.canvas-container {
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

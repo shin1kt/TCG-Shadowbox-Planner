@@ -39,13 +39,13 @@
       </v-col>
     </v-row>
 
-    <!-- モーダルをv-modelで管理 -->
-    <v-dialog v-model="modalOpen" max-width="800px">
+    <!-- モーダルの設定を改善 -->
+    <v-dialog v-model="modalOpen" max-width="90vw" max-height="90vh" scrollable>
       <ImageCanvas
         v-if="selectedIndex !== -1"
         :imageObj="imageList[selectedIndex]"
-        :canvasWidth="500"
-        :canvasHeight="500"
+        :canvasWidth="calculateCanvasSize(imageList[selectedIndex]).width"
+        :canvasHeight="calculateCanvasSize(imageList[selectedIndex]).height"
         @save="handleSave"
         @close="modalOpen = false"
       />
@@ -102,6 +102,37 @@ const handleSave = (updatedImageObj: ImageDataObject) => {
   }
   modalOpen.value = false;
   selectedIndex.value = -1;
+};
+
+// キャンバスサイズ計算ロジックを改善
+const calculateCanvasSize = (imageObj: ImageDataObject) => {
+  // カード要素とダイアログのパディングを考慮
+  const dialogPadding = 48; // ダイアログの余白
+  const cardPadding = 16; // カードの余白
+  const totalPadding = dialogPadding + cardPadding * 2;
+
+  // ビューポートの実効サイズを計算
+  const maxWidth = Math.min(window.innerWidth - totalPadding, 1200);
+  const maxHeight = Math.min(window.innerHeight - totalPadding, 800);
+
+  const imageRatio = imageObj.height / imageObj.width;
+  let width = maxWidth;
+  let height = width * imageRatio;
+
+  // 高さが最大値を超える場合は、高さを基準に計算
+  if (height > maxHeight) {
+    height = maxHeight;
+    width = height / imageRatio;
+  }
+
+  // 最小サイズの設定
+  width = Math.max(width, 280);
+  height = Math.max(height, 200);
+
+  return {
+    width: Math.floor(width),
+    height: Math.floor(height),
+  };
 };
 </script>
 

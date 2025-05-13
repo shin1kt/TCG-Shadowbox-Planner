@@ -111,7 +111,7 @@ const handleEraseMouse = (
   if (!isErasing.value) return;
 
   const rect = canvasRef.value?.getBoundingClientRect();
-  if (!rect || !ctx.value) return;
+  if (!rect || !ctx.value || !originData.value) return;
 
   let clientX: number;
   let clientY: number;
@@ -124,8 +124,14 @@ const handleEraseMouse = (
     clientY = event.clientY;
   }
 
-  const mouseX = clientX - rect.left;
-  const mouseY = clientY - rect.top;
+  // キャンバスの実際のサイズと表示サイズの比率を計算
+  const scaleX = originData.value.width / rect.width;
+  const scaleY = originData.value.height / rect.height;
+
+  // マウス座標をキャンバスの実際のサイズに合わせて調整
+  const mouseX = (clientX - rect.left) * scaleX;
+  const mouseY = (clientY - rect.top) * scaleY;
+
   handleErase(mouseX, mouseY, isNewPath);
 };
 

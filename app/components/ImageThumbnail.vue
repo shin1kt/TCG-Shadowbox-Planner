@@ -1,0 +1,53 @@
+<template>
+  <v-card>
+    <v-card-title> Image Thumbnail </v-card-title>
+    <v-card-subtitle> Displaying Image as Thumbnail </v-card-subtitle>
+    <v-card-actions>
+      <v-img
+        :src="thumbnail"
+        alt="Thumbnail"
+        class="mt-4"
+        :width="imgWidth"
+        :height="imgWidth"
+        @click="handleClick"
+      />
+    </v-card-actions>
+  </v-card>
+</template>
+
+<script lang="ts" setup>
+import { ref, watch } from "vue";
+import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
+
+const props = defineProps<{
+  modelValue: ImageDataObject; // 画像オブジェクト（型付き）
+  imgWidth?: string; // 画像の幅を設定
+}>();
+
+const emit = defineEmits<{
+  (event: "image-clicked", imageObj: ImageDataObject): void; // クリックイベントで画像オブジェクトを親に送信
+}>();
+
+const thumbnail = computed(() => {
+  if (props.modelValue) {
+    return props.modelValue.editedDataUrl; // サムネイルURLを取得
+  }
+  return ""; // デフォルト値
+});
+
+// デフォルト値を設定
+const imgWidth = props.imgWidth ?? "200px";
+const imageHeight = computed(() => {
+  if (props.modelValue) {
+    return `${
+      (parseInt(imgWidth) * props.modelValue.height) / props.modelValue.width
+    }px`;
+  }
+  return "auto"; // デフォルト値
+});
+
+const handleClick = () => {
+  console.log("clicked thubnail");
+  emit("image-clicked", props.modelValue); // 画像をクリックした際に画像オブジェクトを親に送信
+};
+</script>

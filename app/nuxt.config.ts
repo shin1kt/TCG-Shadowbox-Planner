@@ -9,7 +9,7 @@ export default defineNuxtConfig({
   },
   // GitHub Pagesのベースパスを設定
   app: {
-    baseURL: "/tcg-shadowbox-nuxt/",
+    baseURL: "/TCG-Shadowbox-Planner/",
   },
   // 静的サイト生成の設定
   ssr: true,

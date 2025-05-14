@@ -74,7 +74,28 @@
       <v-footer class="d-flex flex-column">
         <div class="px-4 py-2 text-center w-100">
           <div class="mb-2">
-            <small class="text-disabled">v0.0.1-beta</small>
+            <small class="text-disabled">
+              v{{ version }}
+              <v-tooltip location="top">
+                <template v-slot:activator="{ props }">
+                  <v-icon
+                    size="small"
+                    v-bind="props"
+                    class="ms-1"
+                    @click="
+                      window.open(
+                        'https://github.com/shin1kt/TCG-Shadowbox-Planner/blob/main/CHANGELOG.md',
+                        '_blank'
+                      )
+                    "
+                    style="cursor: pointer"
+                  >
+                    mdi-history
+                  </v-icon>
+                </template>
+                変更履歴を表示
+              </v-tooltip>
+            </small>
           </div>
           <div class="mb-2">
             <small class="text-disabled">
@@ -104,6 +125,8 @@
 
 <script setup>
 const dialog = ref(false);
+const pkg = await import("../package.json");
+const version = pkg.version;
 
 useHead({
   title: "TCG Shadowbox Planner",

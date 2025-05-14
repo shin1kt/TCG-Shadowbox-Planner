@@ -268,7 +268,34 @@ const exportToPDF = async () => {
     pdf.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
   }
 
-  pdf.save("layered-images.pdf");
+  // モバイルデバイスでの互換性を向上させるため、Blobを使用
+  try {
+    const pdfBlob = pdf.output("blob");
+    const blobUrl = URL.createObjectURL(pdfBlob);
+
+    // モバイルデバイスでの処理
+    if (
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+    ) {
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = "layered-images.pdf";
+      link.click();
+
+      // 一定時間後にBlobURLを解放
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+      }, 100);
+    } else {
+      // デスクトップでの処理
+      pdf.save("layered-images.pdf");
+    }
+  } catch (error) {
+    console.error("PDF export failed:", error);
+    alert("PDFのエクスポートに失敗しました。もう一度お試しください。");
+  }
 };
 </script>
 

@@ -6,12 +6,11 @@
         <NuxtPage />
       </v-container>
     </v-main>
+    <AppFooter />
   </v-app>
 </template>
 
-<script setup lang="ts">
-import AppHeader from "~/components/AppHeader.vue";
-</script>
+<script setup lang="ts"></script>
 
 <style>
 .v-application {

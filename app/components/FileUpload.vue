@@ -3,7 +3,7 @@
     <v-card-actions>
       <v-file-input
         :label="t('upload.label')"
-        :accept="t('upload.accept')"
+        accept="image/*"
         @change="handleFileChange"
       ></v-file-input>
     </v-card-actions>

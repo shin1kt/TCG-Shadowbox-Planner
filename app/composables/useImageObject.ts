@@ -73,6 +73,20 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
     });
   };
 
+  // 直前の操作を戻す
+  const undo = (imageData: ImageDataObject, count: number = 1) => {
+    console.log({ before: imageData.erasePaths });
+
+    // countが１より小さい場合は終了
+    if (count < 1) return;
+
+    if (imageData.erasePaths.length > 0) {
+      // imageData.erasePaths.pop();
+      imageData.erasePaths.splice(-count, count);
+      redraw(imageData);
+    }
+  };
+
   // 消去処理後の画像をサムネイルとして取得する関数
   const getThumbnail = (): string => {
     return ctx.canvas.toDataURL("image/png");
@@ -98,6 +112,7 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
     initCanvas,
     redraw,
     erase,
+    undo,
     getThumbnail,
     updateEditedDataURL,
   };

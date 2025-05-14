@@ -1,7 +1,15 @@
 <template>
   <v-card>
-    <v-card-title> Image Editing (Transparency) </v-card-title>
-    <v-card-subtitle> Use the canvas to edit the image </v-card-subtitle>
+    <v-card-title class="text-subtitle-1">
+      <v-text-field
+        v-model="title"
+        variant="plain"
+        hide-details
+        density="compact"
+        class="pa-0"
+        @update:model-value="updateTitle"
+      ></v-text-field>
+    </v-card-title>
 
     <v-card-text class="canvas-container pa-0">
       <canvas
@@ -53,6 +61,8 @@ const emit = defineEmits<{
   (event: "save", imageObj: ImageDataObject): void; // 編集後の画像を親に送信
   (event: "close"): void; // モーダルを閉じるイベント
 }>();
+
+const title = ref("");
 
 const originData = ref<ImageDataObject | null>(null); // 元の画像データを保持
 const canvasRef = ref<HTMLCanvasElement | null>(null);
@@ -229,6 +239,13 @@ watch([() => props.canvasWidth, () => props.canvasHeight], () => {
   }
 });
 
+// タイトルが更新されたときの処理
+const updateTitle = (newTitle: string) => {
+  if (originData.value) {
+    originData.value.title = newTitle;
+  }
+};
+
 // キャンバス描画の初期化
 onMounted(() => {
   ctx.value = canvasRef.value?.getContext("2d") || null;
@@ -243,6 +260,9 @@ onMounted(() => {
     ...props.imageObj,
     erasePaths: [...props.imageObj.erasePaths],
   };
+
+  // タイトルの初期化
+  title.value = originData.value.title || "Image Editing (Transparency)";
 
   const { initCanvas, redraw } = useImageObject(ctx.value);
   initCanvas(originData.value);

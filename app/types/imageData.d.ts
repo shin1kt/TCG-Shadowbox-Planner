@@ -4,6 +4,7 @@ export interface ImageDataObject {
   height: number;
   erasePaths: ErasePaths;
   editedDataUrl: string; // 編集後の画像データURL
+  title: string; // 画像のタイトル
 }
 
 export type ErasePath = {

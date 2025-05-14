@@ -1,7 +1,8 @@
 <template>
   <v-card>
-    <v-card-title> Image Thumbnail </v-card-title>
-    <v-card-subtitle> Displaying Image as Thumbnail </v-card-subtitle>
+    <v-card-title class="text-subtitle-1">{{
+      modelValue.title || "Image Thumbnail"
+    }}</v-card-title>
     <v-card-actions>
       <v-img
         :src="thumbnail"

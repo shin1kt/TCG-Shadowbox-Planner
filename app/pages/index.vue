@@ -1,6 +1,23 @@
 <template>
   <v-container>
-    <FileUpload @upload="handleFileUpload" />
+    <v-row>
+      <v-col cols="auto">
+        <v-btn
+          color="primary"
+          @click="exportToPDF"
+          :disabled="imageList.length === 0"
+          size="small"
+          density="compact"
+        >
+          Export PDF
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <FileUpload @upload="handleFileUpload" />
+      </v-col>
+    </v-row>
 
     <v-tabs v-model="activeTab" class="mb-4" :touch="false">
       <v-tab value="grid">Layer Edit</v-tab>
@@ -118,6 +135,9 @@ const activeTab = ref("grid");
 const selectedStackImage = ref(0);
 const layeredImagesRef = ref<{ redraw: () => void } | null>(null);
 
+// jsPDFのインポート方法を変更
+const jsPDF = await import("jspdf").then((m) => m.default || m.jsPDF);
+
 // タブ変更時の処理を追加
 watch(activeTab, (newTab) => {
   if (newTab === "stack") {
@@ -208,6 +228,44 @@ const calculateCanvasSize = (imageObj: ImageDataObject) => {
     width: Math.floor(width),
     height: Math.floor(height),
   };
+};
+
+// PDFエクスポート機能
+const exportToPDF = () => {
+  const pdf = new jsPDF({
+    orientation: "portrait",
+    unit: "px",
+  });
+
+  for (let i = 0; i < imageList.value.length; i++) {
+    if (i > 0) {
+      pdf.addPage();
+    }
+
+    const img = imageList.value[i];
+    // 編集済みの画像データURLを使用
+    const imgData = img.editedDataUrl || img.img.src;
+
+    // ページサイズに合わせて画像のサイズを調整
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgRatio = img.height / img.width;
+
+    let imgWidth = pageWidth;
+    let imgHeight = imgWidth * imgRatio;
+
+    if (imgHeight > pageHeight) {
+      imgHeight = pageHeight;
+      imgWidth = imgHeight / imgRatio;
+    }
+
+    const x = (pageWidth - imgWidth) / 2;
+    const y = (pageHeight - imgHeight) / 2;
+
+    pdf.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
+  }
+
+  pdf.save("layered-images.pdf");
 };
 </script>
 

@@ -63,5 +63,9 @@
     "controls": {
       "title": "3D View Settings"
     }
+  },
+  "footer": {
+    "disclaimer": "This application is provided \"as is\" without warranty of any kind. Use at your own risk.",
+    "showChangelog": "Show Changelog"
   }
 }

@@ -29,14 +29,13 @@ const openChangelog = () => {
                 mdi-history
               </v-icon>
             </template>
-            変更履歴を表示
+            {{ $t("footer.showChangelog") }}
           </v-tooltip>
         </small>
       </div>
       <div class="mb-2">
         <small class="text-disabled">
-          This application is provided "as is" without warranty of any kind. Use
-          at your own risk.
+          {{ $t("footer.disclaimer") }}
         </small>
       </div>
       <div class="mb-2">

@@ -1,7 +1,91 @@
 <template>
   <NuxtLayout>
     <v-app>
+      <v-app-bar>
+        <v-app-bar-title>TCG Shadowbox Planner</v-app-bar-title>
+        <v-spacer></v-spacer>
+        <v-dialog width="600">
+          <template v-slot:activator="{ props }">
+            <v-btn icon v-bind="props">
+              <v-icon>mdi-help-circle</v-icon>
+            </v-btn>
+          </template>
+          <v-card>
+            <v-card-title class="text-h5 pa-4"> Help Guide </v-card-title>
+            <v-card-text class="pa-4">
+              <v-list>
+                <v-list-subheader>1. Upload Images</v-list-subheader>
+                <v-list-item>
+                  <v-list-item-text>
+                    1. Click the upload button at the top of the page<br />
+                    2. Select an image file from your computer<br />
+                    3. Wait for the image to be uploaded
+                  </v-list-item-text>
+                </v-list-item>
+
+                <v-list-subheader>2. Manage Layers</v-list-subheader>
+                <v-list-item>
+                  <v-list-item-text>
+                    • Duplicate images using the copy icon<br />
+                    • Move layers up/down using arrow buttons<br />
+                    • Delete images using the trash icon<br />
+                    • Click on any image to edit it
+                  </v-list-item-text>
+                </v-list-item>
+
+                <v-list-subheader>3. Edit Images</v-list-subheader>
+                <v-list-item>
+                  <v-list-item-text>
+                    1. Click on any image to open the editor<br />
+                    2. Use the tools to cut and shape your image<br />
+                    3. Click save when done
+                  </v-list-item-text>
+                </v-list-item>
+
+                <v-list-subheader>4. Preview in 3D</v-list-subheader>
+                <v-list-item>
+                  <v-list-item-text>
+                    1. Switch to the "3D View" tab<br />
+                    2. View your stacked layers<br />
+                    3. Use numbered buttons to highlight layers
+                  </v-list-item-text>
+                </v-list-item>
+
+                <v-list-subheader>5. Export Your Design</v-list-subheader>
+                <v-list-item>
+                  <v-list-item-text>
+                    1. Click the "Export PDF" button<br />
+                    2. Save the PDF file<br />
+                    3. Use it as your reference
+                  </v-list-item-text>
+                </v-list-item>
+              </v-list>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                color="primary"
+                variant="text"
+                @click="
+                  $event.target
+                    .closest('.v-dialog')
+                    .querySelector('.v-overlay__close-button')
+                    .click()
+                "
+              >
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-app-bar>
       <NuxtPage />
     </v-app>
   </NuxtLayout>
 </template>
+
+<style scoped>
+.v-list-item-text {
+  white-space: pre-line;
+}
+</style>

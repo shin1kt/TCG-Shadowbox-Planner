@@ -7,6 +7,12 @@ export default defineNuxtConfig({
   build: {
     transpile: ["vuetify"],
   },
+  // GitHub Pagesのベースパスを設定
+  app: {
+    baseURL: "/tcg-shadowbox-nuxt/",
+  },
+  // 静的サイト生成の設定
+  ssr: true,
   modules: [
     (_options, nuxt) => {
       nuxt.hooks.hook("vite:extendConfig", (config) => {

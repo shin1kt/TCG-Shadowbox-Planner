@@ -148,13 +148,14 @@ const handleEraseMouse = (
     clientX = event.touches[0].clientX;
     clientY = event.touches[0].clientY;
   } else {
-    clientX = event.clientX + window.scrollX;
-    clientY = event.clientY + window.scrollY;
+    // スクロール位置の計算を修正
+    clientX = event.clientX;
+    clientY = event.clientY;
   }
 
-  // canvasScaleを使用して座標を調整
-  const mouseX = (clientX - rect.left) * canvasScale.value.scaleX;
-  const mouseY = (clientY - rect.top) * canvasScale.value.scaleY;
+  // キャンバス上の正確な位置を計算
+  const mouseX = ((clientX - rect.left) / rect.width) * originData.value.width;
+  const mouseY = ((clientY - rect.top) / rect.height) * originData.value.height;
 
   handleErase(mouseX, mouseY, isNewPath);
 };

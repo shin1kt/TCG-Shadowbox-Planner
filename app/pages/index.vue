@@ -34,8 +34,6 @@
                 v-for="(image, index) in imageList"
                 :key="index"
                 cols="12"
-                sm="6"
-                md="4"
                 class="d-flex px-4"
               >
                 <v-card class="flex-grow-1">

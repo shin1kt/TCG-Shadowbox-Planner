@@ -22,7 +22,22 @@ export default defineNuxtConfig({
     },
     "@nuxt/eslint",
     "@nuxt/test-utils",
+    "@nuxtjs/i18n",
   ],
+  i18n: {
+    langDir: "locales",
+    locales: [
+      { code: "ja", iso: "ja-JP", file: "ja.json", name: "日本語" },
+      { code: "en", iso: "en-US", file: "en.json", name: "English" },
+    ],
+    defaultLocale: "ja",
+    strategy: "prefix_except_default",
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: "i18n_redirected",
+      redirectOn: "root",
+    },
+  },
   vite: {
     vue: {
       template: {

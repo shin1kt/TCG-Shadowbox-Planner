@@ -1,0 +1,61 @@
+{
+  "upload": {
+    "label": "Upload Image",
+    "accept": "Image files"
+  },
+  "buttons": {
+    "exportPDF": "Export PDF",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "duplicate": "Duplicate",
+    "moveUp": "Move Up",
+    "moveDown": "Move Down",
+    "close": "Close"
+  },
+  "tabs": {
+    "layerEdit": "Layer Edit",
+    "3dView": "3D View"
+  },
+  "canvas": {
+    "eraserSize": "Eraser Size",
+    "defaultTitle": "Image Editing (Transparency)"
+  },
+  "image": {
+    "title": "Image {number}"
+  },
+  "header": {
+    "title": "TCG Shadowbox Planner",
+    "language": "Language"
+  },
+  "fileUpload": {
+    "title": "Image Upload",
+    "dropzone": "Drop your image here or click to select",
+    "button": "Select File",
+    "error": "Failed to upload image"
+  },
+  "imageCanvas": {
+    "title": "Canvas",
+    "save": "Save",
+    "clear": "Clear",
+    "undo": "Undo",
+    "redo": "Redo",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "resetZoom": "Reset Zoom"
+  },
+  "imageThumbnail": {
+    "title": "Layer Preview",
+    "noLayers": "No layers",
+    "layer": "Layer {number}"
+  },
+  "help": {
+    "title": "Help",
+    "introduction": "A planner for creating TCG card shadowboxes",
+    "steps": {
+      "1": "Upload your image",
+      "2": "Create layers and arrange parts",
+      "3": "Click save button to download when finished"
+    }
+  }
+}

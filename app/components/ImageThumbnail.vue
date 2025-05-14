@@ -47,7 +47,7 @@ const imageHeight = computed(() => {
 });
 
 const handleClick = () => {
-  console.log("clicked thubnail");
+  // console.log("clicked thubnail");
   emit("image-clicked", props.modelValue); // 画像をクリックした際に画像オブジェクトを親に送信
 };
 </script>

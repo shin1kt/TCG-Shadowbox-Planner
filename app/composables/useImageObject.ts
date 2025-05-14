@@ -75,7 +75,7 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
 
   // 直前の操作を戻す
   const undo = (imageData: ImageDataObject, count: number = 1) => {
-    console.log({ before: imageData.erasePaths });
+    // console.log({ before: imageData.erasePaths });
 
     // countが１より小さい場合は終了
     if (count < 1) return;

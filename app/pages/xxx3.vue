@@ -1,95 +1,51 @@
 <template>
   <v-container>
     <FileUpload @upload="handleFileUpload" />
-
-    <v-tabs v-model="activeTab" class="mb-4">
-      <v-tab value="grid">レイヤー編集</v-tab>
-      <v-tab value="stack">3D表示</v-tab>
-    </v-tabs>
-
-    <v-window v-model="activeTab">
-      <!-- グリッド表示 -->
-      <v-window-item value="grid">
+    <v-row>
+      <v-col cols="12">
         <v-row>
-          <v-col cols="12">
-            <v-row>
-              <v-col
-                v-for="(image, index) in imageList"
-                :key="index"
-                cols="12"
-                sm="6"
-                md="4"
-                class="d-flex"
-              >
-                <v-card class="flex-grow-1">
-                  <ImageThumbnail
-                    :modelValue="image"
-                    @image-clicked="openModal"
-                  />
-                  <v-card-actions>
-                    <v-btn
-                      icon="mdi-content-copy"
-                      variant="text"
-                      @click="duplicateImage(index)"
-                    ></v-btn>
-                    <v-btn
-                      icon="mdi-arrow-up"
-                      variant="text"
-                      @click="moveImage(index, -1)"
-                      :disabled="index === 0"
-                    ></v-btn>
-                    <v-btn
-                      icon="mdi-arrow-down"
-                      variant="text"
-                      @click="moveImage(index, 1)"
-                      :disabled="index === imageList.length - 1"
-                    ></v-btn>
-                    <v-btn
-                      icon="mdi-delete"
-                      variant="text"
-                      color="error"
-                      @click="deleteImage(index)"
-                    ></v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-col>
-            </v-row>
-          </v-col>
-        </v-row>
-      </v-window-item>
-
-      <!-- スタック表示 -->
-      <v-window-item value="stack">
-        <v-row>
-          <v-col cols="12">
-            <v-card>
-              <v-card-text>
-                <LayeredImages v-model="imageList" />
-              </v-card-text>
+          <v-col
+            v-for="(image, index) in imageList"
+            :key="index"
+            cols="12"
+            sm="6"
+            md="4"
+            class="d-flex"
+          >
+            <v-card class="flex-grow-1">
+              <ImageThumbnail :modelValue="image" @image-clicked="openModal" />
               <v-card-actions>
-                <v-row>
-                  <v-col
-                    v-for="(image, index) in imageList"
-                    :key="index"
-                    cols="auto"
-                  >
-                    <v-btn
-                      size="small"
-                      :color="index === selectedStackImage ? 'primary' : ''"
-                      @click="selectedStackImage = index"
-                    >
-                      画像{{ index + 1 }}
-                    </v-btn>
-                  </v-col>
-                </v-row>
+                <v-btn
+                  icon="mdi-content-copy"
+                  variant="text"
+                  @click="duplicateImage(index)"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-arrow-up"
+                  variant="text"
+                  @click="moveImage(index, -1)"
+                  :disabled="index === 0"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-arrow-down"
+                  variant="text"
+                  @click="moveImage(index, 1)"
+                  :disabled="index === imageList.length - 1"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-delete"
+                  variant="text"
+                  color="error"
+                  @click="deleteImage(index)"
+                ></v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
         </v-row>
-      </v-window-item>
-    </v-window>
+      </v-col>
+    </v-row>
 
-    <!-- モーダルの設定 -->
+    <!-- モーダルの設定を改善 -->
     <v-dialog v-model="modalOpen" max-width="90vw" max-height="90vh" scrollable>
       <ImageCanvas
         v-if="selectedIndex !== -1"
@@ -109,13 +65,10 @@ import type { ImageDataObject } from "@/types/imageData"; // 型をインポー�
 import FileUpload from "@/components/FileUpload.vue";
 import ImageThumbnail from "@/components/ImageThumbnail.vue";
 import ImageCanvas from "@/components/ImageCanvas.vue";
-import LayeredImages from "@/components/LayeredImages.vue";
 
 const imageList = ref<ImageDataObject[]>([]); // 画像オブジェクトの配列
 const modalOpen = ref(false); // モーダルの開閉状態
 const selectedIndex = ref<number>(-1);
-const activeTab = ref("grid");
-const selectedStackImage = ref(0);
 
 // 画像がアップロードされたときに呼ばれる関数
 const handleFileUpload = (imageData: ImageDataObject) => {
@@ -204,9 +157,5 @@ const calculateCanvasSize = (imageObj: ImageDataObject) => {
 /* 必要に応じてスタイルを追加 */
 .v-card-actions {
   justify-content: center;
-}
-
-.v-window-item {
-  height: 100%;
 }
 </style>

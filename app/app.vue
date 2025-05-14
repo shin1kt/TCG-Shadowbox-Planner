@@ -93,6 +93,48 @@
 
 <script setup>
 const dialog = ref(false);
+
+useHead({
+  title: "TCG Shadowbox Planner",
+  meta: [
+    { charset: "utf-8" },
+    { name: "viewport", content: "width=device-width, initial-scale=1" },
+    {
+      name: "description",
+      content:
+        "TCGカードのシャドーボックスを簡単に設計できるWebアプリケーション",
+    },
+    // OGP基本設定
+    { property: "og:type", content: "website" },
+    { property: "og:title", content: "TCG Shadowbox Planner" },
+    {
+      property: "og:description",
+      content:
+        "TCGカードのシャドーボックスを簡単に設計できるWebアプリケーション",
+    },
+    { property: "og:site_name", content: "TCG Shadowbox Planner" },
+    {
+      property: "og:url",
+      content: "https://shin1kt.github.io/TCG-Shadowbox-Planner/",
+    },
+    {
+      property: "og:image",
+      content: "https://shin1kt.github.io/TCG-Shadowbox-Planner/screenshot.png",
+    },
+    // Twitter Card設定
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: "TCG Shadowbox Planner" },
+    {
+      name: "twitter:description",
+      content:
+        "TCGカードのシャドーボックスを簡単に設計できるWebアプリケーション",
+    },
+    {
+      name: "twitter:image",
+      content: "https://shin1kt.github.io/TCG-Shadowbox-Planner/screenshot.png",
+    },
+  ],
+});
 </script>
 
 <style scoped>

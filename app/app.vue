@@ -71,6 +71,22 @@
         </v-dialog>
       </v-app-bar>
       <NuxtPage />
+      <v-footer class="d-flex flex-column">
+        <div class="px-4 py-2 text-center w-100">
+          <div class="mb-2">
+            <small class="text-disabled">v0.0.1-beta</small>
+          </div>
+          <div class="mb-2">
+            <small class="text-disabled">
+              This application is provided "as is" without warranty of any kind.
+              Use at your own risk.
+            </small>
+          </div>
+          <div>
+            <span>&copy; 2025 katacom.jp</span>
+          </div>
+        </div>
+      </v-footer>
     </v-app>
   </NuxtLayout>
 </template>
@@ -82,5 +98,13 @@ const dialog = ref(false);
 <style scoped>
 .v-list-item-text {
   white-space: pre-line;
+}
+
+.v-footer {
+  background-color: rgb(var(--v-theme-surface));
+}
+
+.text-disabled {
+  opacity: 0.7;
 }
 </style>

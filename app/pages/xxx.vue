@@ -32,6 +32,12 @@
                   @click="moveImage(index, 1)"
                   :disabled="index === imageList.length - 1"
                 ></v-btn>
+                <v-btn
+                  icon="mdi-delete"
+                  variant="text"
+                  color="error"
+                  @click="deleteImage(index)"
+                ></v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -92,6 +98,17 @@ const moveImage = (index: number, direction: number) => {
     const temp = imageList.value[index];
     imageList.value[index] = imageList.value[newIndex];
     imageList.value[newIndex] = temp;
+  }
+};
+
+// 画像を削除する
+const deleteImage = (index: number) => {
+  imageList.value.splice(index, 1);
+  if (selectedIndex.value === index) {
+    modalOpen.value = false;
+    selectedIndex.value = -1;
+  } else if (selectedIndex.value > index) {
+    selectedIndex.value--;
   }
 };
 

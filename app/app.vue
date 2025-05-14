@@ -4,7 +4,7 @@
       <v-app-bar>
         <v-app-bar-title>TCG Shadowbox Planner</v-app-bar-title>
         <v-spacer></v-spacer>
-        <v-dialog width="600">
+        <v-dialog v-model="dialog" width="600">
           <template v-slot:activator="{ props }">
             <v-btn icon v-bind="props">
               <v-icon>mdi-help-circle</v-icon>
@@ -63,16 +63,7 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn
-                color="primary"
-                variant="text"
-                @click="
-                  $event.target
-                    .closest('.v-dialog')
-                    .querySelector('.v-overlay__close-button')
-                    .click()
-                "
-              >
+              <v-btn color="primary" variant="text" @click="dialog = false">
                 Close
               </v-btn>
             </v-card-actions>
@@ -83,6 +74,10 @@
     </v-app>
   </NuxtLayout>
 </template>
+
+<script setup>
+const dialog = ref(false);
+</script>
 
 <style scoped>
 .v-list-item-text {

@@ -60,7 +60,9 @@ const setupScene = () => {
   camera.position.z = 30;
 
   // レンダラー設定
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer = new THREE.WebGLRenderer({
+    antialias: true,
+  });
   renderer.setSize(
     containerRef.value.clientWidth,
     containerRef.value.clientHeight
@@ -122,14 +124,18 @@ const drawImages = () => {
 
     const texture = new THREE.Texture(imageObj.img);
     texture.needsUpdate = true;
+    texture.colorSpace = THREE.SRGBColorSpace;
     textures.push(texture); // テクスチャを追跡配列に追加
 
     const material = new THREE.MeshBasicMaterial({
       map: texture,
       transparent: true,
       side: THREE.DoubleSide,
-      depthWrite: false,
+      depthWrite: true,
       depthTest: true,
+      alphaTest: 0.01,
+      opacity: 1.0,
+      blending: THREE.NormalBlending,
     });
 
     // 画像サイズに基づいてジオメトリを作成

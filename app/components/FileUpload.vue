@@ -1,7 +1,5 @@
 <template>
   <v-card>
-    <v-card-title> File Upload </v-card-title>
-    <v-card-subtitle> Upload an image to be processed </v-card-subtitle>
     <v-card-actions>
       <v-file-input
         label="Upload Image"

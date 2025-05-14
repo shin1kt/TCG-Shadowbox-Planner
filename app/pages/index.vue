@@ -135,8 +135,7 @@ const activeTab = ref("grid");
 const selectedStackImage = ref(0);
 const layeredImagesRef = ref<{ redraw: () => void } | null>(null);
 
-// jsPDFのインポート方法を変更
-const jsPDF = await import("jspdf").then((m) => m.default || m.jsPDF);
+let jsPDF: any = null;
 
 // タブ変更時の処理を追加
 watch(activeTab, (newTab) => {
@@ -231,7 +230,12 @@ const calculateCanvasSize = (imageObj: ImageDataObject) => {
 };
 
 // PDFエクスポート機能
-const exportToPDF = () => {
+const exportToPDF = async () => {
+  if (!jsPDF) {
+    const module = await import("jspdf");
+    jsPDF = module.jsPDF;
+  }
+
   const pdf = new jsPDF({
     orientation: "portrait",
     unit: "px",
@@ -243,7 +247,6 @@ const exportToPDF = () => {
     }
 
     const img = imageList.value[i];
-    // 編集済みの画像データURLを使用
     const imgData = img.editedDataUrl || img.img.src;
 
     // ページサイズに合わせて画像のサイズを調整

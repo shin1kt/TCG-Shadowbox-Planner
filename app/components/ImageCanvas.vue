@@ -6,15 +6,7 @@
       <div>
         <div>
           削除サイズ:
-          <div
-            ref="eraseSizeRef"
-            :style="{
-              height: `${eraseRadius * 2}px`,
-              width: `${eraseRadius * 2}px`,
-              borderRadius: '50%',
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            }"
-          ></div>
+          <div ref="eraseSizeRef" :style="displayEraseSize"></div>
         </div>
         <v-slider v-model="eraseRadius" @change="updateEraseSize"></v-slider>
       </div>
@@ -40,7 +32,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch, onUnmounted } from "vue";
+import { ref, onMounted, watch, onUnmounted, computed } from "vue";
 import type { ErasePaths, ImageDataObject } from "@/types/imageData"; // 型をインポート
 import { useImageObject } from "@/composables/useImageObject";
 
@@ -61,6 +53,28 @@ const ctx = ref<CanvasRenderingContext2D | null>(null);
 const eraseRadius = ref(10); // 消去サイズの初期値
 const eraseSizeRef = ref<HTMLDivElement | null>(null); // 消去サイズの表示用
 const isErasing = ref(false); // マウスボタンが押されているかどうかを追跡
+
+// キャンバスの実際のサイズと表示サイズの比率を計算
+const canvasScale = computed(() => {
+  if (!canvasRef.value || !originData.value) return { scaleX: 1, scaleY: 1 };
+
+  const rect = canvasRef.value.getBoundingClientRect();
+  return {
+    scaleX: originData.value.width / rect.width,
+    scaleY: originData.value.height / rect.height,
+  };
+});
+
+// 表示用の削除サイズを計算
+const displayEraseSize = computed(() => {
+  const size = eraseRadius.value / canvasScale.value.scaleX;
+  return {
+    width: `${size * 2}px`,
+    height: `${size * 2}px`,
+    borderRadius: "50%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  };
+});
 
 // キャンバスの消去処理
 const handleErase = (

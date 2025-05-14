@@ -17,7 +17,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from "vue";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
 
 const props = defineProps<{

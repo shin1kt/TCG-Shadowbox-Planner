@@ -121,12 +121,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, nextTick } from "vue";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
-import FileUpload from "@/components/FileUpload.vue";
-import ImageThumbnail from "@/components/ImageThumbnail.vue";
-import ImageCanvas from "@/components/ImageCanvas.vue";
-import LayeredImages from "@/components/LayeredImages.vue";
 
 const imageList = ref<ImageDataObject[]>([]); // 画像オブジェクトの配列
 const modalOpen = ref(false); // モーダルの開閉状態

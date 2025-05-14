@@ -11,9 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { defineEmits } from "vue";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
-import { useImageObject } from "@/composables/useImageObject";
 
 const emit = defineEmits<{
   (event: "upload", imageObj: ImageDataObject): void; // 型を使用してイベントを定義
@@ -60,6 +58,7 @@ const handleFileChange = (event: Event) => {
           height,
           erasePaths: [],
           editedDataUrl: img.src,
+          title: "Uploaded Image",
         };
 
         // ImageObjectをemit

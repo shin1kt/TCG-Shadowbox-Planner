@@ -82,6 +82,17 @@
               Use at your own risk.
             </small>
           </div>
+          <div class="mb-2">
+            <small>
+              <v-icon size="small">mdi-github</v-icon>
+              <a
+                href="https://github.com/shin1kt/TCG-Shadowbox-Planner"
+                target="_blank"
+                rel="noopener noreferrer"
+                >shin1kt/TCG-Shadowbox-Planner</a
+              >
+            </small>
+          </div>
           <div>
             <span>&copy; 2025 katacom.jp</span>
           </div>

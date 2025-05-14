@@ -12,6 +12,8 @@ With this tool, you can:
 
 This app provides a convenient way to refine your TCG shadowbox creations, ensuring that you get the best results before cutting any physical cards.
 
+The application is live and accessible at: https://shin1kt.github.io/TCG-Shadowbox-Planner/
+
 ### Help Guide
 
 #### 1. Upload Images

@@ -164,38 +164,8 @@ const drawImages = () => {
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.z = -index * layerDistance.value;
 
-    // 枠線用のジオメトリとマテリアルを作成
-    const borderGeometry = new THREE.EdgesGeometry(geometry);
-    const borderMaterial = new THREE.LineBasicMaterial({
-      color: 0x000000,
-      linewidth: 1,
-      opacity: 0.6,
-      transparent: true,
-    });
-    const border = new THREE.LineSegments(borderGeometry, borderMaterial);
-    border.position.copy(mesh.position);
-    border.position.z += 0.001; // わずかに前面に配置
-
-    // 二重線用の外側の枠線
-    const outerBorderGeometry = new THREE.EdgesGeometry(
-      new THREE.PlaneGeometry(
-        imageObj.width * scale + 0.02,
-        imageObj.height * scale + 0.02
-      )
-    );
-    const outerBorder = new THREE.LineSegments(
-      outerBorderGeometry,
-      borderMaterial
-    );
-    outerBorder.position.copy(mesh.position);
-    outerBorder.position.z += 0.002; // 最前面に配置
-
     scene.add(mesh);
-    scene.add(border);
-    scene.add(outerBorder);
     meshes.push(mesh);
-    meshes.push(border);
-    meshes.push(outerBorder);
   });
 
   // カメラの位置を調整

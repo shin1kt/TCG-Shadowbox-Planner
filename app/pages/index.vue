@@ -2,13 +2,13 @@
   <v-container>
     <FileUpload @upload="handleFileUpload" />
 
-    <v-tabs v-model="activeTab" class="mb-4">
-      <v-tab value="grid">レイヤー編集</v-tab>
-      <v-tab value="stack">3D表示</v-tab>
+    <v-tabs v-model="activeTab" class="mb-4" :touch="false">
+      <v-tab value="grid">Layer Edit</v-tab>
+      <v-tab value="stack">3D View</v-tab>
     </v-tabs>
 
-    <v-window v-model="activeTab">
-      <!-- グリッド表示 -->
+    <v-window v-model="activeTab" :touch="false">
+      <!-- Grid View -->
       <v-window-item value="grid">
         <v-row>
           <v-col cols="12">
@@ -58,7 +58,7 @@
         </v-row>
       </v-window-item>
 
-      <!-- スタック表示 -->
+      <!-- Stack View -->
       <v-window-item value="stack">
         <v-row>
           <v-col cols="12">
@@ -78,7 +78,7 @@
                       :color="index === selectedStackImage ? 'primary' : ''"
                       @click="selectedStackImage = index"
                     >
-                      画像{{ index + 1 }}
+                      Image {{ index + 1 }}
                     </v-btn>
                   </v-col>
                 </v-row>

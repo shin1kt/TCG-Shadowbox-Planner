@@ -8,7 +8,9 @@
             :min="0.1"
             :max="2"
             :step="0.1"
-            label="レイヤー間の距離"
+            label="Layer Distance"
+            @mousedown.stop
+            @touchstart.stop
           ></v-slider>
         </v-col>
       </v-row>
@@ -28,7 +30,7 @@ const props = defineProps<{
 }>();
 
 // 調整可能なパラメータ
-const layerDistance = ref(0.5); // レイヤー間の距離
+const layerDistance = ref(0.5); // Layer distance
 
 const containerRef = ref<HTMLDivElement | null>(null);
 

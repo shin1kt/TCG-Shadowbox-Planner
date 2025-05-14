@@ -126,7 +126,7 @@ useHead({
     },
     {
       property: "og:image",
-      content: "https://shin1kt.github.io/TCG-Shadowbox-Planner/screenshot.png",
+      content: "https://shin1kt.github.io/TCG-Shadowbox-Planner/ogp.png",
     },
     // Twitter Card設定
     { name: "twitter:card", content: "summary_large_image" },
@@ -138,7 +138,7 @@ useHead({
     },
     {
       name: "twitter:image",
-      content: "https://shin1kt.github.io/TCG-Shadowbox-Planner/screenshot.png",
+      content: "https://shin1kt.github.io/TCG-Shadowbox-Planner/ogp.png",
     },
   ],
 });

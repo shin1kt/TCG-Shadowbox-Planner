@@ -1,9 +1,9 @@
 <template>
-  <v-card>
-    <v-card-title class="text-subtitle-1">{{
-      modelValue.title || "Image Thumbnail"
-    }}</v-card-title>
-    <v-card-actions>
+  <div>
+    <div class="text-subtitle-1">
+      {{ modelValue.title || "Image Thumbnail" }}
+    </div>
+    <div class="d-flex justify-center">
       <v-img
         :src="thumbnail"
         alt="Thumbnail"
@@ -12,8 +12,8 @@
         :height="imgWidth"
         @click="handleClick"
       />
-    </v-card-actions>
-  </v-card>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>

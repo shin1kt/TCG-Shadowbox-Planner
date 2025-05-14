@@ -36,13 +36,15 @@
                 cols="12"
                 sm="6"
                 md="4"
-                class="d-flex"
+                class="d-flex px-4"
               >
                 <v-card class="flex-grow-1">
-                  <ImageThumbnail
-                    :modelValue="image"
-                    @image-clicked="openModal"
-                  />
+                  <v-card-text>
+                    <ImageThumbnail
+                      :modelValue="image"
+                      @image-clicked="openModal"
+                    />
+                  </v-card-text>
                   <v-card-actions>
                     <v-btn
                       icon="mdi-content-copy"

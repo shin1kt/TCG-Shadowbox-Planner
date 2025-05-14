@@ -64,7 +64,7 @@
           <v-col cols="12">
             <v-card>
               <v-card-text>
-                <LayeredImages v-model="imageList" />
+                <LayeredImages v-model="imageList" ref="layeredImagesRef" />
               </v-card-text>
               <v-card-actions>
                 <v-row>
@@ -104,7 +104,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, watch, nextTick } from "vue";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
 import FileUpload from "@/components/FileUpload.vue";
 import ImageThumbnail from "@/components/ImageThumbnail.vue";
@@ -116,6 +116,17 @@ const modalOpen = ref(false); // モーダルの開閉状態
 const selectedIndex = ref<number>(-1);
 const activeTab = ref("grid");
 const selectedStackImage = ref(0);
+const layeredImagesRef = ref<{ redraw: () => void } | null>(null);
+
+// タブ変更時の処理を追加
+watch(activeTab, (newTab) => {
+  if (newTab === "stack") {
+    // 次のティックで再描画を実行
+    nextTick(() => {
+      layeredImagesRef.value?.redraw();
+    });
+  }
+});
 
 // 画像がアップロードされたときに呼ばれる関数
 const handleFileUpload = (imageData: ImageDataObject) => {

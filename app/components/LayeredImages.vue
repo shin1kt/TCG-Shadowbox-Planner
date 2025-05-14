@@ -46,6 +46,11 @@ const meshes: THREE.Mesh<
 >[] = [];
 const textures: THREE.Texture[] = []; // テクスチャを追跡するための配列
 
+// 外部から呼び出し可能な再描画メソッドを定義
+const redraw = () => {
+  drawImages();
+};
+
 // シーンのセットアップ
 const setupScene = () => {
   if (!containerRef.value) return;
@@ -258,6 +263,11 @@ onUnmounted(() => {
 
   camera = null;
   controls = null;
+});
+
+// expose redraw method
+defineExpose({
+  redraw,
 });
 </script>
 

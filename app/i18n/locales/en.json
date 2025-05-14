@@ -57,5 +57,11 @@
       "2": "Create layers and arrange parts",
       "3": "Click save button to download when finished"
     }
+  },
+  "layeredImages": {
+    "layerDistance": "Layer Distance",
+    "controls": {
+      "title": "3D View Settings"
+    }
   }
 }

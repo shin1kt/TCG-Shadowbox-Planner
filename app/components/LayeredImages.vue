@@ -1,6 +1,9 @@
 <template>
   <div>
     <div class="controls mb-4">
+      <v-card-title class="text-subtitle-1">{{
+        t("layeredImages.controls.title")
+      }}</v-card-title>
       <v-row>
         <v-col cols="12" sm="6">
           <v-slider
@@ -8,7 +11,7 @@
             :min="0.1"
             :max="2"
             :step="0.1"
-            label="Layer Distance"
+            :label="t('layeredImages.layerDistance')"
             @mousedown.stop
             @touchstart.stop
           ></v-slider>
@@ -21,9 +24,12 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, watch, onUnmounted } from "vue";
+import { useI18n } from "vue-i18n";
 import type { ImageDataObject } from "@/types/imageData";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: ImageDataObject[];

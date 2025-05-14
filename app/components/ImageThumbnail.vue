@@ -7,7 +7,7 @@
       <v-img
         :src="thumbnail"
         alt="Thumbnail"
-        class="mt-4"
+        class="mt-4 thumbnail-image"
         :width="imgWidth"
         :height="imgWidth"
         @click="handleClick"
@@ -52,3 +52,15 @@ const handleClick = () => {
   emit("image-clicked", props.modelValue); // 画像をクリックした際に画像オブジェクトを親に送信
 };
 </script>
+
+<style scoped>
+.thumbnail-image {
+  border: 2px solid #ccc;
+  border-radius: 4px;
+}
+
+.thumbnail-image:hover {
+  border-color: #666;
+  cursor: pointer;
+}
+</style>

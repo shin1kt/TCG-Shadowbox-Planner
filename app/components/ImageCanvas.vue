@@ -148,8 +148,8 @@ const handleEraseMouse = (
     clientX = event.touches[0].clientX;
     clientY = event.touches[0].clientY;
   } else {
-    clientX = event.clientX;
-    clientY = event.clientY;
+    clientX = event.clientX + window.scrollX;
+    clientY = event.clientY + window.scrollY;
   }
 
   // canvasScaleを使用して座標を調整

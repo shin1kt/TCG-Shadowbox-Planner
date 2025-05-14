@@ -21,9 +21,13 @@ jobs:
           cache-dependency-path: app/package-lock.json
       # Pick your own package manager and build script
       - run: npm install
-      - run: npx nuxt build --preset github_pages
+      - name: Build application
         env:
           NUXT_APP_BASE_URL: /TCG-Shadowbox-Planner/
+          GA_ID: ${{ secrets.GOOGLE_ANALYTICS_ID }}
+        run: |
+          export GOOGLE_ANALYTICS_ID=$GA_ID
+          npx nuxt build --preset github_pages
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

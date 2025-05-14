@@ -40,10 +40,13 @@ let camera: THREE.PerspectiveCamera | null = null;
 let renderer: THREE.WebGLRenderer | null = null;
 let controls: OrbitControls | null = null;
 let animationFrameId: number | null = null;
-const meshes: THREE.Mesh<
-  THREE.BufferGeometry,
-  THREE.MeshBasicMaterial | THREE.MeshBasicMaterial[]
->[] = [];
+const meshes: (
+  | THREE.Mesh<
+      THREE.BufferGeometry,
+      THREE.MeshBasicMaterial | THREE.MeshBasicMaterial[]
+    >
+  | THREE.LineSegments
+)[] = [];
 const textures: THREE.Texture[] = []; // テクスチャを追跡するための配列
 
 // 外部から呼び出し可能な再描画メソッドを定義
@@ -97,26 +100,32 @@ const drawImages = () => {
   // 既存のメッシュを削除
   meshes.forEach(
     (
-      mesh: THREE.Mesh<
-        THREE.BufferGeometry,
-        THREE.MeshBasicMaterial | THREE.MeshBasicMaterial[]
-      >
+      mesh:
+        | THREE.Mesh<
+            THREE.BufferGeometry,
+            THREE.MeshBasicMaterial | THREE.MeshBasicMaterial[]
+          >
+        | THREE.LineSegments
     ) => {
       if (scene) {
         scene.remove(mesh);
-        mesh.geometry.dispose();
-        if (Array.isArray(mesh.material)) {
-          mesh.material.forEach((m) => {
-            if (m.map) {
-              m.map.dispose();
+        if (mesh instanceof THREE.Mesh) {
+          mesh.geometry.dispose();
+          if (Array.isArray(mesh.material)) {
+            mesh.material.forEach((m) => {
+              if (m.map) {
+                m.map.dispose();
+              }
+              m.dispose();
+            });
+          } else {
+            if (mesh.material.map) {
+              mesh.material.map.dispose();
             }
-            m.dispose();
-          });
-        } else {
-          if (mesh.material.map) {
-            mesh.material.map.dispose();
+            mesh.material.dispose();
           }
-          mesh.material.dispose();
+        } else if (mesh instanceof THREE.LineSegments) {
+          mesh.geometry.dispose();
         }
       }
     }
@@ -154,8 +163,39 @@ const drawImages = () => {
 
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.z = -index * layerDistance.value;
+
+    // 枠線用のジオメトリとマテリアルを作成
+    const borderGeometry = new THREE.EdgesGeometry(geometry);
+    const borderMaterial = new THREE.LineBasicMaterial({
+      color: 0x000000,
+      linewidth: 1,
+      opacity: 0.6,
+      transparent: true,
+    });
+    const border = new THREE.LineSegments(borderGeometry, borderMaterial);
+    border.position.copy(mesh.position);
+    border.position.z += 0.001; // わずかに前面に配置
+
+    // 二重線用の外側の枠線
+    const outerBorderGeometry = new THREE.EdgesGeometry(
+      new THREE.PlaneGeometry(
+        imageObj.width * scale + 0.02,
+        imageObj.height * scale + 0.02
+      )
+    );
+    const outerBorder = new THREE.LineSegments(
+      outerBorderGeometry,
+      borderMaterial
+    );
+    outerBorder.position.copy(mesh.position);
+    outerBorder.position.z += 0.002; // 最前面に配置
+
     scene.add(mesh);
+    scene.add(border);
+    scene.add(outerBorder);
     meshes.push(mesh);
+    meshes.push(border);
+    meshes.push(outerBorder);
   });
 
   // カメラの位置を調整
@@ -222,24 +262,30 @@ onUnmounted(() => {
   // リソースの解放
   meshes.forEach(
     (
-      mesh: THREE.Mesh<
-        THREE.BufferGeometry,
-        THREE.MeshBasicMaterial | THREE.MeshBasicMaterial[]
-      >
+      mesh:
+        | THREE.Mesh<
+            THREE.BufferGeometry,
+            THREE.MeshBasicMaterial | THREE.MeshBasicMaterial[]
+          >
+        | THREE.LineSegments
     ) => {
-      mesh.geometry.dispose();
-      if (Array.isArray(mesh.material)) {
-        mesh.material.forEach((m) => {
-          if (m.map) {
-            m.map.dispose();
+      if (mesh instanceof THREE.Mesh) {
+        mesh.geometry.dispose();
+        if (Array.isArray(mesh.material)) {
+          mesh.material.forEach((m) => {
+            if (m.map) {
+              m.map.dispose();
+            }
+            m.dispose();
+          });
+        } else {
+          if (mesh.material.map) {
+            mesh.material.map.dispose();
           }
-          m.dispose();
-        });
-      } else {
-        if (mesh.material.map) {
-          mesh.material.map.dispose();
+          mesh.material.dispose();
         }
-        mesh.material.dispose();
+      } else if (mesh instanceof THREE.LineSegments) {
+        mesh.geometry.dispose();
       }
     }
   );

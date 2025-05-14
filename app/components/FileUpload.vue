@@ -2,7 +2,7 @@
   <v-card>
     <v-card-actions>
       <v-file-input
-        label="Upload Image"
+        :label="t('upload.label')"
         accept="image/*"
         @change="handleFileChange"
       ></v-file-input>
@@ -11,7 +11,10 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from "vue-i18n";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
+
+const { t } = useI18n();
 
 const emit = defineEmits<{
   (event: "upload", imageObj: ImageDataObject): void; // 型を使用してイベントを定義
@@ -58,7 +61,7 @@ const handleFileChange = (event: Event) => {
           height,
           erasePaths: [],
           editedDataUrl: img.src,
-          title: "Uploaded Image",
+          title: file.name,
         };
 
         // ImageObjectをemit

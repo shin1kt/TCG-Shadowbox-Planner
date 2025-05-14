@@ -1,0 +1,71 @@
+{
+  "upload": {
+    "label": "画像をアップロード",
+    "accept": "画像ファイル"
+  },
+  "buttons": {
+    "exportPDF": "PDFエクスポート",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "duplicate": "複製",
+    "moveUp": "上へ移動",
+    "moveDown": "下へ移動",
+    "close": "閉じる"
+  },
+  "tabs": {
+    "layerEdit": "レイヤー編集",
+    "3dView": "3D表示"
+  },
+  "canvas": {
+    "eraserSize": "消しゴムサイズ",
+    "defaultTitle": "画像編集（透過）"
+  },
+  "image": {
+    "title": "画像 {number}"
+  },
+  "header": {
+    "title": "TCG シャドウボックス プランナー",
+    "language": "言語"
+  },
+  "fileUpload": {
+    "title": "画像アップロード",
+    "dropzone": "ここに画像をドロップするか、クリックして選択してください",
+    "button": "ファイルを選択",
+    "error": "画像のアップロードに失敗しました"
+  },
+  "imageCanvas": {
+    "title": "キャンバス",
+    "save": "保存",
+    "clear": "クリア",
+    "undo": "元に戻す",
+    "redo": "やり直し",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "resetZoom": "ズームリセット"
+  },
+  "imageThumbnail": {
+    "title": "レイヤープレビュー",
+    "noLayers": "レイヤーがありません",
+    "layer": "レイヤー {number}"
+  },
+  "help": {
+    "title": "ヘルプ",
+    "introduction": "TCGカードのシャドウボックスを作成するためのプランナーです",
+    "steps": {
+      "1": "画像をアップロードしてください",
+      "2": "レイヤーを作成し、各パーツを配置します",
+      "3": "完成したら保存ボタンでダウンロードできます"
+    }
+  },
+  "layeredImages": {
+    "layerDistance": "レイヤー間隔",
+    "controls": {
+      "title": "3D表示の設定"
+    }
+  },
+  "footer": {
+    "disclaimer": "このアプリケーションは現状のまま提供され、いかなる保証もありません。利用は自己責任でお願いします。",
+    "showChangelog": "変更履歴を表示"
+  }
+}

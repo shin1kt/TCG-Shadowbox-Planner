@@ -9,7 +9,7 @@
           size="small"
           density="compact"
         >
-          Export PDF
+          {{ t("buttons.exportPDF") }}
         </v-btn>
       </v-col>
     </v-row>
@@ -20,8 +20,8 @@
     </v-row>
 
     <v-tabs v-model="activeTab" class="mb-4" :touch="false">
-      <v-tab value="grid">Layer Edit</v-tab>
-      <v-tab value="stack">3D View</v-tab>
+      <v-tab value="grid">{{ t("tabs.layerEdit") }}</v-tab>
+      <v-tab value="stack">{{ t("tabs.3dView") }}</v-tab>
     </v-tabs>
 
     <v-window v-model="activeTab" :touch="false">
@@ -48,24 +48,28 @@
                       icon="mdi-content-copy"
                       variant="text"
                       @click="duplicateImage(index)"
+                      :title="t('buttons.duplicate')"
                     ></v-btn>
                     <v-btn
                       icon="mdi-arrow-up"
                       variant="text"
                       @click="moveImage(index, -1)"
                       :disabled="index === 0"
+                      :title="t('buttons.moveUp')"
                     ></v-btn>
                     <v-btn
                       icon="mdi-arrow-down"
                       variant="text"
                       @click="moveImage(index, 1)"
                       :disabled="index === imageList.length - 1"
+                      :title="t('buttons.moveDown')"
                     ></v-btn>
                     <v-btn
                       icon="mdi-delete"
                       variant="text"
                       color="error"
                       @click="deleteImage(index)"
+                      :title="t('buttons.delete')"
                     ></v-btn>
                   </v-card-actions>
                 </v-card>
@@ -95,7 +99,7 @@
                       :color="index === selectedStackImage ? 'primary' : ''"
                       @click="selectedStackImage = index"
                     >
-                      Image {{ index + 1 }}
+                      {{ t("image.title", { number: index + 1 }) }}
                     </v-btn>
                   </v-col>
                 </v-row>
@@ -121,7 +125,10 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from "vue-i18n";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
+
+const { t } = useI18n();
 
 const imageList = ref<ImageDataObject[]>([]); // 画像オブジェクトの配列
 const modalOpen = ref(false); // モーダルの開閉状態

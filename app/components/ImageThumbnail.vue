@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="text-subtitle-1">
-      {{ modelValue.title || "Image Thumbnail" }}
+      {{ modelValue.title || t("canvas.defaultTitle") }}
     </div>
     <div class="d-flex justify-center">
       <v-img
@@ -17,12 +17,15 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from "vue-i18n";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
 
 const props = defineProps<{
   modelValue: ImageDataObject; // 画像オブジェクト（型付き）
   imgWidth?: string; // 画像の幅を設定
 }>();
+
+const { t } = useI18n();
 
 const emit = defineEmits<{
   (event: "image-clicked", imageObj: ImageDataObject): void; // クリックイベントで画像オブジェクトを親に送信

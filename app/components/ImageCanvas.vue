@@ -36,7 +36,7 @@
     <v-card-text>
       <div class="erase-size-container">
         <div class="d-flex">
-          <div>Eraser Size:</div>
+          <div>{{ t("canvas.eraserSize") }}:</div>
           <div class="position-relative pl-4">
             <div
               ref="eraseSizeRef"
@@ -49,16 +49,21 @@
       </div>
     </v-card-text>
     <v-card-actions>
-      <v-btn @click="saveEdits" color="primary">Save</v-btn>
-      <v-btn @click="closeDialog" color="secondary">Cancel</v-btn>
+      <v-btn @click="saveEdits" color="primary">{{ t("buttons.save") }}</v-btn>
+      <v-btn @click="closeDialog" color="secondary">{{
+        t("buttons.cancel")
+      }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted, watch, onUnmounted, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import type { ErasePaths, ImageDataObject } from "@/types/imageData"; // 型をインポート
 import { useImageObject } from "@/composables/useImageObject";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   imageObj: ImageDataObject; // 画像オブジェクトを受け取る

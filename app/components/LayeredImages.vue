@@ -23,7 +23,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import type { ImageDataObject } from "@/types/imageData";
 import * as THREE from "three";

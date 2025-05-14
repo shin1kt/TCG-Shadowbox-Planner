@@ -38,7 +38,7 @@ const handleFileUpload = (imageData: ImageDataObject) => {
 
 // サムネイルがクリックされたときにモーダルを開く
 const openModal = (imageData: ImageDataObject) => {
-  console.log("open modal");
+  // console.log("open modal");
   imageObj.value = imageData; // 画像データを設定
   modalOpen.value = true; // モーダルを開く
 };

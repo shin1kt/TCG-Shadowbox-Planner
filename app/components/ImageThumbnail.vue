@@ -17,7 +17,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
 
@@ -51,7 +50,7 @@ const imageHeight = computed(() => {
 });
 
 const handleClick = () => {
-  console.log("clicked thubnail");
+  // console.log("clicked thubnail");
   emit("image-clicked", props.modelValue); // 画像をクリックした際に画像オブジェクトを親に送信
 };
 </script>

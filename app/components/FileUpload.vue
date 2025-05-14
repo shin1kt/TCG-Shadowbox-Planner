@@ -11,10 +11,8 @@
 </template>
 
 <script lang="ts" setup>
-import { defineEmits } from "vue";
 import { useI18n } from "vue-i18n";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
-import { useImageObject } from "@/composables/useImageObject";
 
 const { t } = useI18n();
 

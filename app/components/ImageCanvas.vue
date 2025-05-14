@@ -1,14 +1,23 @@
 <template>
   <v-card>
-    <v-card-title class="text-subtitle-1">
+    <v-card-title class="text-subtitle-1 d-flex align-center">
       <v-text-field
         v-model="title"
         variant="plain"
         hide-details
         density="compact"
-        class="pa-0"
+        class="pa-0 flex-grow-1"
         @update:model-value="updateTitle"
       ></v-text-field>
+      <v-btn
+        icon="mdi-undo"
+        size="small"
+        :color="undoCounts.length === 0 ? 'grey-darken-3' : 'grey-lighten-1'"
+        :disabled="undoCounts.length === 0"
+        @click="undo(1)"
+        class="undo-button ml-2"
+      >
+      </v-btn>
     </v-card-title>
 
     <v-card-text class="canvas-container pa-0">
@@ -76,6 +85,9 @@ const eraseRadius = ref(10); // 消去サイズの初期値
 const eraseSizeRef = ref<HTMLDivElement | null>(null); // 消去サイズの表示用
 const isErasing = ref(false); // マウスボタンが押されているかどうかを追跡
 
+const undoCounts = ref<number[]>([]);
+const currentEraseCount = ref(0); // 現在の消去作業のカウントを保持する変数を追加
+
 // キャンバスの実際のサイズと表示サイズの比率を計算
 const canvasScale = computed(() => {
   if (!canvasRef.value || !originData.value) return { scaleX: 1, scaleY: 1 };
@@ -107,6 +119,27 @@ const handleErase = (
 
   if (!originData.value) return;
   erase(originData.value, mouseX, mouseY, eraseRadius.value, isNewPath);
+};
+
+/**
+ * 直前の操作を戻す
+ *
+ */
+const undo = (count: number = 1) => {
+  if (!originData.value) return;
+  if (!ctx.value) return;
+  const { undo } = useImageObject(ctx.value);
+
+  // 配列の長さを取得
+  const length = undoCounts.value.length;
+  // 末尾からcount個の要素だけを取得
+  const undoCountsArray = undoCounts.value.slice(length - count, length);
+  const undoCountsSum = undoCountsArray.reduce((acc, curr) => acc + curr, 0);
+
+  // 使用した要素を配列から削除
+  undoCounts.value = undoCounts.value.slice(0, length - count);
+
+  undo(originData.value, undoCountsSum);
 };
 
 // 編集後の画像を親コンポーネントに返す
@@ -175,40 +208,56 @@ const startErase = () => {
     isErasing.value = true;
     canvas.classList.add("erase-cursor");
     handleEraseMouse(event, true);
+    currentEraseCount.value = 1; // 初回のeraseでカウントを1に設定
   };
 
   const handleMouseMove = (event: MouseEvent) => {
     if (isErasing.value) {
       handleEraseMouse(event, false);
+      currentEraseCount.value++; // 現在のカウントを増やす
     }
   };
 
   const handleMouseUp = () => {
     isErasing.value = false;
     canvas.classList.remove("erase-cursor");
+    if (currentEraseCount.value > 0) {
+      undoCounts.value.push(currentEraseCount.value); // 消去作業が完了した時点でundoCountsに追加
+    }
+    currentEraseCount.value = 0; // カウントをリセット
   };
 
   const handleMouseOut = () => {
     isErasing.value = false;
     canvas.classList.remove("erase-cursor");
+    if (currentEraseCount.value > 0) {
+      undoCounts.value.push(currentEraseCount.value); // マウスが外れた時点でもundoCountsに追加
+    }
+    currentEraseCount.value = 0; // カウントをリセット
   };
 
   // タッチイベントハンドラー
   const handleTouchStart = (event: TouchEvent) => {
-    event.preventDefault(); // スクロールを防止
+    event.preventDefault();
     isErasing.value = true;
     handleEraseMouse(event, true);
+    currentEraseCount.value = 1; // 初回のeraseでカウントを1に設定
   };
 
   const handleTouchMove = (event: TouchEvent) => {
-    event.preventDefault(); // スクロールを防止
+    event.preventDefault();
     if (isErasing.value) {
       handleEraseMouse(event, false);
+      currentEraseCount.value++; // 現在のカウントを増やす
     }
   };
 
   const handleTouchEnd = () => {
     isErasing.value = false;
+    if (currentEraseCount.value > 0) {
+      undoCounts.value.push(currentEraseCount.value); // タッチ終了時点でundoCountsに追加
+    }
+    currentEraseCount.value = 0; // カウントをリセット
   };
 
   // マウスイベントリスナーを追加
@@ -293,6 +342,7 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 .erase-size-container {
   position: relative;
@@ -306,5 +356,15 @@ canvas {
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.5);
   pointer-events: none;
+}
+.undo-button {
+  background-color: white !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.undo-button:hover {
+  background-color: #f5f5f5 !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
 }
 </style>

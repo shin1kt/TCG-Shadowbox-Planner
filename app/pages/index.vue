@@ -125,13 +125,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
-import FileUpload from "@/components/FileUpload.vue";
-import ImageThumbnail from "@/components/ImageThumbnail.vue";
-import ImageCanvas from "@/components/ImageCanvas.vue";
-import LayeredImages from "@/components/LayeredImages.vue";
 
 const { t } = useI18n();
 

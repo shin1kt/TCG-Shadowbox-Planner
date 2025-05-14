@@ -17,4 +17,12 @@ import AppHeader from "~/components/AppHeader.vue";
 .v-application {
   background: #f5f5f5;
 }
+
+.v-footer {
+  background-color: rgb(var(--v-theme-surface));
+}
+
+.text-disabled {
+  opacity: 0.7;
+}
 </style>

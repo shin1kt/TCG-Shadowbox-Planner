@@ -2,15 +2,7 @@
   <v-card>
     <v-card-title> Image Editing (Transparency) </v-card-title>
     <v-card-subtitle> Use the canvas to edit the image </v-card-subtitle>
-    <v-card-text>
-      <div>
-        <div>
-          削除サイズ:
-          <div ref="eraseSizeRef" :style="displayEraseSize"></div>
-        </div>
-        <v-slider v-model="eraseRadius" @change="updateEraseSize"></v-slider>
-      </div>
-    </v-card-text>
+
     <v-card-text class="canvas-container pa-0">
       <canvas
         ref="canvasRef"
@@ -23,6 +15,21 @@
           margin: '0 auto',
         }"
       ></canvas>
+    </v-card-text>
+    <v-card-text>
+      <div class="erase-size-container">
+        <div class="d-flex">
+          <div>Eraser Size:</div>
+          <div class="position-relative pl-4">
+            <div
+              ref="eraseSizeRef"
+              class="erase-size-preview"
+              :style="eraseSizeStyle"
+            ></div>
+          </div>
+        </div>
+        <v-slider v-model="eraseRadius"></v-slider>
+      </div>
     </v-card-text>
     <v-card-actions>
       <v-btn @click="saveEdits" color="primary">Save</v-btn>
@@ -65,15 +72,13 @@ const canvasScale = computed(() => {
   };
 });
 
-// 表示用の削除サイズを計算
-const displayEraseSize = computed(() => {
+// 動的な削除サイズのスタイルのみを計算
+const eraseSizeStyle = computed(() => {
   const size = eraseRadius.value / canvasScale.value.scaleX;
   return {
     width: `${size * 2}px`,
     height: `${size * 2}px`,
-    borderRadius: "50%",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  };
+  } as const;
 });
 
 // キャンバスの消去処理
@@ -100,8 +105,7 @@ const saveEdits = async () => {
 
 // モーダルを閉じる処理
 const closeDialog = () => {
-  // emit("save", props.imageObj); // 編集後の画像オブジェクトを親に送信
-  emit("close"); // モーダルを閉じるイベントを親に送信
+  emit("close");
 };
 
 // 画像が変更されるたびに描画
@@ -138,27 +142,11 @@ const handleEraseMouse = (
     clientY = event.clientY;
   }
 
-  // キャンバスの実際のサイズと表示サイズの比率を計算
-  const scaleX = originData.value.width / rect.width;
-  const scaleY = originData.value.height / rect.height;
-
-  // マウス座標をキャンバスの実際のサイズに合わせて調整
-  const mouseX = (clientX - rect.left) * scaleX;
-  const mouseY = (clientY - rect.top) * scaleY;
+  // canvasScaleを使用して座標を調整
+  const mouseX = (clientX - rect.left) * canvasScale.value.scaleX;
+  const mouseY = (clientY - rect.top) * canvasScale.value.scaleY;
 
   handleErase(mouseX, mouseY, isNewPath);
-};
-
-// 削除サイズの更新
-const updateEraseSize = () => {
-  if (eraseSizeRef.value) {
-    eraseSizeRef.value.style.width = `${eraseRadius.value * 2}px`;
-    eraseSizeRef.value.style.height = `${eraseRadius.value * 2}px`;
-    eraseSizeRef.value.style.borderRadius = "50%";
-    eraseSizeRef.value.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-    eraseSizeRef.value.style.position = "absolute";
-    eraseSizeRef.value.style.pointerEvents = "none"; // マウスイベントを無視
-  }
 };
 
 // マウスダウン・マウスムーブ・マウスアップイベントで消去処理を行う
@@ -279,5 +267,18 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.erase-size-container {
+  position: relative;
+  min-height: 50px; /* プレビューの高さ分の余白を確保 */
+}
+.erase-size-preview {
+  position: absolute;
+  left: 0;
+  top: 0.2em;
+  /* transform: translateY(-50%); */
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
 }
 </style>

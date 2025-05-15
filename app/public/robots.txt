@@ -1,2 +1,3 @@
 User-Agent: *
-Disallow:
+Allow: /
+Sitemap: https://shin1kt.github.io/TCG-Shadowbox-Planner/sitemap.xml

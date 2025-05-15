@@ -24,68 +24,17 @@
           </v-list-item>
         </v-list>
       </v-menu>
-      <v-dialog v-model="dialog" width="600">
-        <template v-slot:activator="{ props }">
-          <v-btn icon class="ml-2" v-bind="props">
-            <v-icon>mdi-help-circle</v-icon>
-          </v-btn>
-        </template>
-        <v-card>
-          <v-card-title class="text-h5 pa-4">{{
-            t("help.title")
-          }}</v-card-title>
-          <v-card-text class="pa-4">
-            <v-list>
-              <v-list-subheader>{{ t("help.upload.title") }}</v-list-subheader>
-              <v-list-item>
-                <v-list-item-title
-                  v-html="t('help.upload.content')"
-                ></v-list-item-title>
-              </v-list-item>
-
-              <v-list-subheader>{{ t("help.layers.title") }}</v-list-subheader>
-              <v-list-item>
-                <v-list-item-title
-                  v-html="t('help.layers.content')"
-                ></v-list-item-title>
-              </v-list-item>
-
-              <v-list-subheader>{{ t("help.edit.title") }}</v-list-subheader>
-              <v-list-item>
-                <v-list-item-title
-                  v-html="t('help.edit.content')"
-                ></v-list-item-title>
-              </v-list-item>
-
-              <v-list-subheader>{{ t("help.preview.title") }}</v-list-subheader>
-              <v-list-item>
-                <v-list-item-title
-                  v-html="t('help.preview.content')"
-                ></v-list-item-title>
-              </v-list-item>
-
-              <v-list-subheader>{{ t("help.export.title") }}</v-list-subheader>
-              <v-list-item>
-                <v-list-item-title
-                  v-html="t('help.export.content')"
-                ></v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" variant="text" @click="dialog = false">
-              {{ t("buttons.close") }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+      <v-btn icon class="ml-2" @click="dialog = true">
+        <v-icon>mdi-help-circle</v-icon>
+      </v-btn>
+      <HelpDialog v-model="dialog" />
     </v-container>
   </v-app-bar>
 </template>
 
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
+import HelpDialog from "./HelpDialog.vue";
 
 const dialog = ref(false);
 const { t, locale, locales } = useI18n();

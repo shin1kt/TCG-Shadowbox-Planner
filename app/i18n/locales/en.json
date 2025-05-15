@@ -51,6 +51,30 @@
   },
   "help": {
     "title": "Help",
+    "note": {
+      "title": "Detailed Help",
+      "content": "For more detailed instructions, please check our note article"
+    },
+    "upload": {
+      "title": "Image Upload",
+      "content": "To upload an image, click the 'Upload Image' button at the top of the screen or drag and drop your image."
+    },
+    "layers": {
+      "title": "Layer Operations",
+      "content": "Layers are stacked from top to bottom.\nUse the duplicate button to add layers and arrows to change their order."
+    },
+    "edit": {
+      "title": "Image Editing",
+      "content": "For each layer, click or drag to specify areas you want to make transparent.\nYou can adjust the eraser size."
+    },
+    "preview": {
+      "title": "3D View",
+      "content": "In the 3D view tab, you can check how layers stack together.\nUse mouse or touch controls to change the viewpoint."
+    },
+    "export": {
+      "title": "Export",
+      "content": "When you're done editing, use the PDF Export button to create a printable PDF."
+    },
     "introduction": "A planner for creating TCG card shadowboxes",
     "steps": {
       "1": "Upload your image",

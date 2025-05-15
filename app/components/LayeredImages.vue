@@ -32,6 +32,7 @@ const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: ImageDataObject[];
+  selectedIndex?: number[]; // 選択されたレイヤーのインデックスの配列
 }>();
 
 // 調整可能なパラメータ
@@ -59,12 +60,24 @@ const redraw = () => {
   drawImages();
 };
 
+// プロパティの変更を監視
+watch(
+  [layerDistance, () => props.selectedIndex, () => props.modelValue],
+  () => {
+    nextTick(() => {
+      drawImages();
+    });
+  },
+  { deep: true }
+);
+
 // シーンのセットアップ
 const setupScene = () => {
   if (!containerRef.value) return;
 
   // シーン作成
   scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xffffff);
 
   // カメラ設定
   const aspect =
@@ -75,6 +88,8 @@ const setupScene = () => {
   // レンダラー設定
   renderer = new THREE.WebGLRenderer({
     antialias: true,
+    alpha: true,
+    preserveDrawingBuffer: true,
   });
   renderer.setSize(
     containerRef.value.clientWidth,
@@ -90,12 +105,112 @@ const setupScene = () => {
     controls.dampingFactor = 0.05;
     controls.screenSpacePanning = true;
   }
+
+  // 初期描画
+  drawImages();
 };
 
 // 画像の描画
 const drawImages = () => {
   if (!scene || !camera || !renderer || !containerRef.value) return;
 
+  // 既存のメッシュとテクスチャをクリーンアップ
+  cleanup();
+
+  // シーンが空の場合は早期リターン
+  if (props.modelValue.length === 0) return;
+
+  // 画像を順番に描画（インデックスが小さい順＝後ろから描画）
+  props.modelValue.forEach((imageObj, index) => {
+    if (!scene) return;
+
+    const texture = new THREE.Texture(imageObj.img);
+    texture.needsUpdate = true;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    textures.push(texture);
+
+    // レイヤーの選択状態に応じて透明度を設定
+    const isSelected = props.selectedIndex?.includes(index) ?? true;
+    const opacity = isSelected ? 1.0 : 0.05;
+
+    const material = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      depthTest: true,
+      alphaTest: 0.001,
+      opacity: opacity,
+      blending: THREE.CustomBlending,
+      blendSrc: THREE.SrcAlphaFactor,
+      blendDst: THREE.OneMinusSrcAlphaFactor,
+      blendEquation: THREE.AddEquation,
+    });
+
+    // 画像サイズに基づいてジオメトリを作成
+    const maxDimension = Math.max(imageObj.width, imageObj.height);
+    const scale = 20 / maxDimension;
+    const geometry = new THREE.PlaneGeometry(
+      imageObj.width * scale,
+      imageObj.height * scale
+    );
+
+    // 前面の画像
+    const frontMesh = new THREE.Mesh(geometry, material);
+    frontMesh.position.z = -index * layerDistance.value;
+    frontMesh.renderOrder = props.modelValue.length - index;
+
+    // 背面の画像（厚みを表現するため）
+    const backMaterial = material.clone();
+    backMaterial.opacity = material.opacity;
+    const backMesh = new THREE.Mesh(geometry, backMaterial);
+    backMesh.position.z = frontMesh.position.z - 0.05;
+    backMesh.renderOrder = frontMesh.renderOrder - 0.5;
+
+    scene.add(frontMesh);
+    scene.add(backMesh);
+    meshes.push(frontMesh, backMesh);
+  });
+
+  // カメラの位置を調整
+  if (camera && meshes.length > 0) {
+    const lastMesh = meshes[meshes.length - 1];
+    const distance = Math.abs(lastMesh.position.z) + 15;
+    camera.position.z = distance;
+    camera.updateProjectionMatrix();
+  }
+};
+
+// アニメーションループ
+const animate = () => {
+  if (!renderer || !scene || !camera) return;
+
+  animationFrameId = requestAnimationFrame(animate);
+  controls?.update();
+
+  // シーンが空でない場合のみレンダリング
+  if (scene.children.length > 0) {
+    renderer.render(scene, camera);
+  }
+};
+
+// ウィンドウリサイズ時の処理
+const handleResize = () => {
+  if (!camera || !renderer || !containerRef.value) return;
+
+  const width = containerRef.value.clientWidth;
+  const height = containerRef.value.clientHeight;
+
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+
+  // リサイズ時に再描画
+  drawImages();
+};
+
+// クリーンアップ関数
+const cleanup = () => {
   // 既存のテクスチャを解放
   textures.forEach((texture) => {
     texture.dispose();
@@ -127,90 +242,12 @@ const drawImages = () => {
     }
   });
   meshes.length = 0;
-
-  // 画像を順番に描画（インデックスが小さい順＝後ろから描画）
-  props.modelValue.forEach((imageObj, index) => {
-    if (!scene) return;
-
-    const texture = new THREE.Texture(imageObj.img);
-    texture.needsUpdate = true;
-    texture.colorSpace = THREE.SRGBColorSpace;
-    textures.push(texture);
-
-    const material = new THREE.MeshBasicMaterial({
-      map: texture,
-      transparent: true,
-      side: THREE.DoubleSide,
-      depthWrite: true,
-      depthTest: true,
-      alphaTest: 0.01,
-      opacity: 1.0,
-      blending: THREE.NormalBlending,
-    });
-
-    // 画像サイズに基づいてジオメトリを作成
-    const maxDimension = Math.max(imageObj.width, imageObj.height);
-    const scale = 20 / maxDimension;
-    const geometry = new THREE.PlaneGeometry(
-      imageObj.width * scale,
-      imageObj.height * scale
-    );
-
-    // 前面の画像
-    const frontMesh = new THREE.Mesh(geometry, material);
-    frontMesh.position.z = -index * layerDistance.value;
-
-    // 背面の画像（厚みを表現するため）
-    const backMesh = new THREE.Mesh(geometry, material.clone());
-    backMesh.position.z = frontMesh.position.z - 0.05; // 0.05の間隔で重ねる
-
-    scene.add(frontMesh);
-    scene.add(backMesh);
-    meshes.push(frontMesh, backMesh);
-  });
-
-  // カメラの位置を調整
-  if (camera && meshes.length > 0) {
-    const lastMesh = meshes[meshes.length - 1];
-    const distance = Math.abs(lastMesh.position.z) + 15;
-    camera.position.z = distance;
-  }
 };
-
-// アニメーションループ
-const animate = () => {
-  if (!renderer || !scene || !camera) return;
-
-  animationFrameId = requestAnimationFrame(animate);
-  controls?.update();
-  renderer.render(scene, camera);
-};
-
-// ウィンドウリサイズ時の処理
-const handleResize = () => {
-  if (!camera || !renderer || !containerRef.value) return;
-
-  const width = containerRef.value.clientWidth;
-  const height = containerRef.value.clientHeight;
-
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-  renderer.setSize(width, height);
-
-  // リサイズ時に再描画
-  drawImages();
-};
-
-// パラメータの変更を監視
-watch([layerDistance], () => {
-  drawImages();
-});
 
 onMounted(() => {
   // DOMの更新を待ってから初期化
   setTimeout(() => {
     setupScene();
-    drawImages();
     animate();
   }, 100);
 

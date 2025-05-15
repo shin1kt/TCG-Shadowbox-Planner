@@ -95,7 +95,11 @@
           <v-col cols="12">
             <v-card>
               <v-card-text>
-                <LayeredImages v-model="imageList" ref="layeredImagesRef" />
+                <LayeredImages
+                  v-model="imageList"
+                  ref="layeredImagesRef"
+                  :selected-index="selectedStackImages"
+                />
               </v-card-text>
               <v-card-actions>
                 <v-row>
@@ -106,8 +110,15 @@
                   >
                     <v-btn
                       size="small"
-                      :color="index === selectedStackImage ? 'primary' : ''"
-                      @click="selectedStackImage = index"
+                      :color="
+                        selectedStackImages.includes(index) ? 'primary' : ''
+                      "
+                      :variant="
+                        selectedStackImages.includes(index)
+                          ? 'elevated'
+                          : 'outlined'
+                      "
+                      @click="toggleStackImage(index)"
                     >
                       {{ image.title }}
                     </v-btn>
@@ -144,10 +155,30 @@ const imageList = ref<ImageDataObject[]>([]); // 画像オブジェクトの配�
 const modalOpen = ref(false); // モーダルの開閉状態
 const selectedIndex = ref<number>(-1);
 const activeTab = ref("grid");
-const selectedStackImage = ref(0);
+const selectedStackImages = ref<number[]>([]); // 選択されたレイヤーのインデックスを配列で管理
 const layeredImagesRef = ref<{ redraw: () => void } | null>(null);
 
 let jsPDF: any = null;
+
+// 画像リストの変更を監視
+watch(
+  imageList,
+  (newList) => {
+    // 画像が追加された場合は、その画像を選択状態にする
+    if (newList.length > 0) {
+      const currentIndices = new Set(selectedStackImages.value);
+      const allIndices = Array.from({ length: newList.length }, (_, i) => i);
+
+      // まだ選択されていないインデックスを追加
+      allIndices.forEach((index) => {
+        if (!currentIndices.has(index)) {
+          selectedStackImages.value.push(index);
+        }
+      });
+    }
+  },
+  { deep: true }
+);
 
 // タブ変更時の処理を追加
 watch(activeTab, (newTab) => {
@@ -170,6 +201,11 @@ const handleFileUpload = (imageData: ImageDataObject) => {
   }
 
   imageList.value.unshift(imageData); // 配列の先頭に追加
+  // 新しい画像を選択状態に追加
+  selectedStackImages.value = [
+    0,
+    ...selectedStackImages.value.map((i) => i + 1),
+  ];
 };
 
 // サムネイルがクリックされたときにモーダルを開く
@@ -322,6 +358,16 @@ const exportToPDF = async () => {
   }
 };
 
+// レイヤーの選択状態をトグルする関数
+const toggleStackImage = (index: number) => {
+  const currentIndex = selectedStackImages.value.indexOf(index);
+  if (currentIndex === -1) {
+    selectedStackImages.value.push(index);
+  } else {
+    selectedStackImages.value.splice(currentIndex, 1);
+  }
+};
+
 const resetAll = () => {
   // 確認ダイアログを表示
   if (window.confirm(t("confirm.reset"))) {
@@ -329,9 +375,21 @@ const resetAll = () => {
     selectedIndex.value = -1;
     modalOpen.value = false;
     activeTab.value = "grid";
-    selectedStackImage.value = 0;
+    selectedStackImages.value = []; // 選択状態もリセット
   }
 };
+
+// 初期状態ですべてのレイヤーを選択状態に
+const initializeSelectedImages = () => {
+  selectedStackImages.value = Array.from(
+    { length: imageList.value.length },
+    (_, i) => i
+  );
+};
+
+onMounted(() => {
+  initializeSelectedImages();
+});
 </script>
 
 <style scoped>

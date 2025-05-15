@@ -13,6 +13,51 @@ export default defineNuxtConfig({
   // GitHub Pagesのベースパスを設定
   app: {
     baseURL: "/TCG-Shadowbox-Planner/",
+    head: {
+      title: "TCG Shadowbox Planner",
+      meta: [
+        { charset: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        {
+          key: "description",
+          name: "description",
+          content: "TCGカードのシャドーボックスプランナー",
+        },
+        // OGP
+        {
+          key: "og:site_name",
+          property: "og:site_name",
+          content: "TCG Shadowbox Planner",
+        },
+        { key: "og:type", property: "og:type", content: "website" },
+        {
+          key: "og:url",
+          property: "og:url",
+          content: "https://shin1kt.github.io/TCG-Shadowbox-Planner/",
+        },
+        {
+          key: "og:title",
+          property: "og:title",
+          content: "TCG Shadowbox Planner",
+        },
+        {
+          key: "og:description",
+          property: "og:description",
+          content: "TCGカードのシャドーボックスプランナー",
+        },
+        {
+          key: "og:image",
+          property: "og:image",
+          content: "https://shin1kt.github.io/TCG-Shadowbox-Planner/ogp.png",
+        },
+        // Twitter Card
+        {
+          key: "twitter:card",
+          name: "twitter:card",
+          content: "summary_large_image",
+        },
+      ],
+    },
   },
   // 静的サイト生成の設定
   ssr: true,

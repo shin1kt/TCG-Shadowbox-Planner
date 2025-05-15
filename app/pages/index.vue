@@ -11,6 +11,16 @@
         >
           {{ t("buttons.exportPDF") }}
         </v-btn>
+        <v-btn
+          color="error"
+          class="ml-2"
+          @click="resetAll"
+          :disabled="imageList.length === 0"
+          size="small"
+          density="compact"
+        >
+          {{ t("buttons.reset") }}
+        </v-btn>
       </v-col>
     </v-row>
     <v-row>
@@ -297,6 +307,17 @@ const exportToPDF = async () => {
   } catch (error) {
     console.error("PDF export failed:", error);
     alert("PDFのエクスポートに失敗しました。もう一度お試しください。");
+  }
+};
+
+const resetAll = () => {
+  // 確認ダイアログを表示
+  if (window.confirm(t("confirm.reset"))) {
+    imageList.value = [];
+    selectedIndex.value = -1;
+    modalOpen.value = false;
+    activeTab.value = "grid";
+    selectedStackImage.value = 0;
   }
 };
 </script>

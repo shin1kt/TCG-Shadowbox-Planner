@@ -11,7 +11,8 @@
     "duplicate": "Duplicate",
     "moveUp": "Move Up",
     "moveDown": "Move Down",
-    "close": "Close"
+    "close": "Close",
+    "reset": "Reset"
   },
   "tabs": {
     "layerEdit": "Layer Edit",
@@ -91,5 +92,8 @@
   "footer": {
     "disclaimer": "This application is provided \"as is\" without warranty of any kind. Use at your own risk.",
     "showChangelog": "Show Changelog"
+  },
+  "confirm": {
+    "reset": "Are you sure you want to reset all images and edits?"
   }
 }

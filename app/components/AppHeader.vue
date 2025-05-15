@@ -1,7 +1,7 @@
 <template>
   <v-app-bar>
     <v-container class="d-flex align-center">
-      <v-app-bar-title>{{ $t("header.title") }}</v-app-bar-title>
+      <v-app-bar-title>{{ t("header.title") }}</v-app-bar-title>
       <v-spacer></v-spacer>
       <v-menu>
         <template v-slot:activator="{ props }">
@@ -85,7 +85,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 const dialog = ref(false);

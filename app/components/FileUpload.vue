@@ -64,6 +64,8 @@ const handleFileChange = (event: Event) => {
           erasePaths: [],
           editedDataUrl: img.src,
           title: file.name,
+          // ユニークなIDを生成
+          id: crypto.randomUUID(),
         };
 
         // ImageObjectをemit

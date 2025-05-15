@@ -101,7 +101,7 @@
                 <v-row>
                   <v-col
                     v-for="(image, index) in imageList"
-                    :key="index"
+                    :key="image.id"
                     cols="auto"
                   >
                     <v-btn
@@ -184,7 +184,11 @@ const openModal = (imageData: ImageDataObject) => {
 // 画像を複製する
 const duplicateImage = (index: number) => {
   const imageToDuplicate = imageList.value[index];
-  const duplicatedImage = { ...imageToDuplicate }; // 浅いコピーを作成
+  const duplicatedImage = {
+    ...imageToDuplicate,
+    id: crypto.randomUUID(), // 新しいIDを生成
+    title: `${imageToDuplicate.title} (copy)`, // コピーであることを明示
+  };
   imageList.value.splice(index + 1, 0, duplicatedImage);
 };
 

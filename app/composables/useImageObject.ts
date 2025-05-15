@@ -5,15 +5,16 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
   const initCanvas = (imageData: ImageDataObject) => {
     ctx.canvas.width = imageData.width;
     ctx.canvas.height = imageData.height;
+    // 完全な透明でクリア
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.fillStyle = "white"; // 背景色を白に設定
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.globalCompositeOperation = "source-over"; // 通常の描画モードに設定
   };
 
   // 画像の再描画
   const redraw = (imageData: ImageDataObject) => {
+    // キャンバスを透明でクリア
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    // 画像を描画
     ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(imageData.img, 0, 0, imageData.width, imageData.height);
 
@@ -23,7 +24,7 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
       ctx.beginPath();
       ctx.moveTo(path.startX, path.startY);
       ctx.lineTo(path.endX, path.endY);
-      ctx.lineWidth = 20;
+      ctx.lineWidth = path.radius * 2;
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
       ctx.stroke();
@@ -70,18 +71,15 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
         : imageData.erasePaths[imageData.erasePaths.length - 1]?.endY ?? mouseY,
       endX: mouseX,
       endY: mouseY,
+      radius: eraseRadius, // 消しゴムの半径を保存
     });
   };
 
   // 直前の操作を戻す
   const undo = (imageData: ImageDataObject, count: number = 1) => {
-    // console.log({ before: imageData.erasePaths });
-
-    // countが１より小さい場合は終了
     if (count < 1) return;
 
     if (imageData.erasePaths.length > 0) {
-      // imageData.erasePaths.pop();
       imageData.erasePaths.splice(-count, count);
       redraw(imageData);
     }
@@ -97,7 +95,6 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
     const dataUrl = getThumbnail();
     imageData.editedDataUrl = dataUrl;
 
-    // 新しい画像オブジェクトを作成せず、既存のsrcを更新
     return new Promise<void>((resolve) => {
       const tempImg = new Image();
       tempImg.onload = () => {

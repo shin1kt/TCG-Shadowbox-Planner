@@ -2,6 +2,8 @@
 
 ![Version](https://img.shields.io/badge/version-0.0.2--beta-blue)
 
+[日本語のREADMEはこちら](readme.ja.md)
+
 ### Overview
 
 TCG Shadowbox Planner is a web application designed to help you easily plan and visualize your Trading Card Game (TCG) shadowbox creations. Whether you're cutting, layering, or designing your shadowbox with real paper, this app allows you to digitally experiment with your ideas before starting the physical work.

@@ -41,6 +41,7 @@
         ref="canvasRef"
         :width="canvasWidth"
         :height="canvasHeight"
+        class="checkered-background"
         :style="{
           width: `${canvasWidth}px`,
           height: `${canvasHeight}px`,
@@ -131,7 +132,7 @@ const drawBackground = () => {
   const canvas = canvasRef.value;
   const context = ctx.value;
 
-  // キャンバスをクリア
+  // キャンバスをクリアするときは完全な透明に
   context.clearRect(0, 0, canvas.width, canvas.height);
 };
 
@@ -362,9 +363,9 @@ const updateTitle = (newTitle: string) => {
 <style scoped>
 canvas {
   border: 1px solid #ccc;
-  background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='8' height='8' fill='%23ffffff'/%3E%3Crect x='8' y='0' width='8' height='8' fill='%23e0e0e0'/%3E%3Crect x='0' y='8' width='8' height='8' fill='%23e0e0e0'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23ffffff'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 16px 16px;
+}
+canvas.checkered-background {
+  background-color: transparent !important; /* 背景を強制的に透明に */
 }
 .erase-cursor {
   cursor: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"%3E%3Ccircle cx="25" cy="25" r="25" fill="rgba(0, 0, 0, 0.5)" /%3E%3C/svg%3E'),

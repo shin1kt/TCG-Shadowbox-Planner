@@ -52,4 +52,5 @@ export default defineNuxtConfig({
   gtag: {
     id: process.env.GOOGLE_ANALYTICS_ID || DEFAULT_GA_ID,
   },
+  css: ["@/assets/css/common.css"], // パスはapp/からの相対パスになります
 });

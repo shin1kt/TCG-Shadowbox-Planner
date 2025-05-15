@@ -5,12 +5,13 @@ export function useImageObject(ctx: CanvasRenderingContext2D) {
   const initCanvas = (imageData: ImageDataObject) => {
     ctx.canvas.width = imageData.width;
     ctx.canvas.height = imageData.height;
+    // 完全な透明でクリア
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   };
 
   // 画像の再描画
   const redraw = (imageData: ImageDataObject) => {
-    // キャンバスをクリア
+    // キャンバスを透明でクリア
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     // 画像を描画

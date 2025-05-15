@@ -10,6 +10,8 @@ TCG Shadowbox Planner is a web application designed to help you easily plan and 
 
 詳細な変更履歴は[CHANGELOG.md](CHANGELOG.md)をご覧ください。
 
+For a detailed tutorial, please check out our [guide on note](https://note.com/fancy_gerbil880/n/nfc61eeac0841) (in Japanese).
+
 With this tool, you can:
 - **Preview** your TCG shadowbox design by layering and cutting virtual card images.
 - **Experiment** with different card arrangements to visualize how they will fit together.

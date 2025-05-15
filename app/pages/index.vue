@@ -109,7 +109,7 @@
                       :color="index === selectedStackImage ? 'primary' : ''"
                       @click="selectedStackImage = index"
                     >
-                      {{ t("image.title", { number: index + 1 }) }}
+                      {{ image.title }}
                     </v-btn>
                   </v-col>
                 </v-row>
@@ -161,6 +161,14 @@ watch(activeTab, (newTab) => {
 
 // 画像がアップロードされたときに呼ばれる関数
 const handleFileUpload = (imageData: ImageDataObject) => {
+  // タイトルがすでにimageListに存在する場合は、新しいタイトルを生成
+  // 添字の数字を1ずつ増やしていく
+  const title = imageData.title;
+  const index = imageList.value.findIndex((img) => img.title === title);
+  if (index !== -1) {
+    imageData.title = `${title} (${index + 1})`;
+  }
+
   imageList.value.unshift(imageData); // 配列の先頭に追加
 };
 

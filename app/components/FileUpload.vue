@@ -2,6 +2,7 @@
   <v-card>
     <v-card-actions>
       <v-file-input
+        v-model="fileInput"
         :label="t('upload.label')"
         accept="image/*"
         @change="handleFileChange"
@@ -15,6 +16,7 @@ import { useI18n } from "vue-i18n";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
 
 const { t } = useI18n();
+const fileInput = ref<File | null>(null);
 
 const emit = defineEmits<{
   (event: "upload", imageObj: ImageDataObject): void; // 型を使用してイベントを定義
@@ -66,6 +68,8 @@ const handleFileChange = (event: Event) => {
 
         // ImageObjectをemit
         emit("upload", imageData); // 型付きでイベントをemit
+        // アップロード後にフォームをリセット
+        fileInput.value = null;
       };
       img.src = reader.result as string;
     };

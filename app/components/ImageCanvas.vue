@@ -108,7 +108,52 @@ const eraseSizeStyle = computed(() => {
   } as const;
 });
 
-// キャンバスの消去処理
+// キャンバスの背景パターンを描画
+const drawBackground = () => {
+  if (!ctx.value || !canvasRef.value) return;
+
+  const canvas = canvasRef.value;
+  const context = ctx.value;
+
+  // キャンバスをクリア
+  context.clearRect(0, 0, canvas.width, canvas.height);
+};
+
+// キャンバスの再描画処理を修正
+const redrawCanvas = () => {
+  if (!ctx.value || !originData.value) return;
+
+  const { redraw } = useImageObject(ctx.value);
+  drawBackground(); // 背景をクリア
+  redraw(originData.value); // 画像を描画
+};
+
+// キャンバス描画の初期化
+onMounted(() => {
+  ctx.value = canvasRef.value?.getContext("2d") || null;
+
+  if (!ctx.value) {
+    console.error("Failed to get canvas context");
+    return;
+  }
+
+  originData.value = {
+    ...props.imageObj,
+    erasePaths: [...props.imageObj.erasePaths],
+  };
+
+  title.value = originData.value.title || "Image Editing (Transparency)";
+
+  const { initCanvas } = useImageObject(ctx.value);
+  initCanvas(originData.value);
+  redrawCanvas(); // 修正した再描画関数を使用
+
+  if (canvasRef.value) {
+    startErase();
+  }
+});
+
+// 消去処理の後の再描画を修正
 const handleErase = (
   mouseX: number,
   mouseY: number,
@@ -119,27 +164,23 @@ const handleErase = (
 
   if (!originData.value) return;
   erase(originData.value, mouseX, mouseY, eraseRadius.value, isNewPath);
+  redrawCanvas(); // 修正した再描画関数を使用
 };
 
-/**
- * 直前の操作を戻す
- *
- */
+// Undo処理の後の再描画を修正
 const undo = (count: number = 1) => {
   if (!originData.value) return;
   if (!ctx.value) return;
   const { undo } = useImageObject(ctx.value);
 
-  // 配列の長さを取得
   const length = undoCounts.value.length;
-  // 末尾からcount個の要素だけを取得
   const undoCountsArray = undoCounts.value.slice(length - count, length);
   const undoCountsSum = undoCountsArray.reduce((acc, curr) => acc + curr, 0);
 
-  // 使用した要素を配列から削除
   undoCounts.value = undoCounts.value.slice(0, length - count);
 
   undo(originData.value, undoCountsSum);
+  redrawCanvas(); // 修正した再描画関数を使用
 };
 
 // 編集後の画像を親コンポーネントに返す
@@ -300,38 +341,12 @@ const updateTitle = (newTitle: string) => {
     originData.value.title = newTitle;
   }
 };
-
-// キャンバス描画の初期化
-onMounted(() => {
-  ctx.value = canvasRef.value?.getContext("2d") || null;
-
-  if (!ctx.value) {
-    console.error("Failed to get canvas context");
-    return;
-  }
-
-  // 元データを参照として保持し、erasePaths配列のみ新しく作成
-  originData.value = {
-    ...props.imageObj,
-    erasePaths: [...props.imageObj.erasePaths],
-  };
-
-  // タイトルの初期化
-  title.value = originData.value.title || "Image Editing (Transparency)";
-
-  const { initCanvas, redraw } = useImageObject(ctx.value);
-  initCanvas(originData.value);
-  redraw(originData.value);
-
-  if (canvasRef.value) {
-    startErase();
-  }
-});
 </script>
 
 <style scoped>
 canvas {
   border: 1px solid #ccc;
+  background-color: #f0f0f0; /* 薄いグレーの背景色を設定 */
 }
 .erase-cursor {
   cursor: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"%3E%3Ccircle cx="25" cy="25" r="25" fill="rgba(0, 0, 0, 0.5)" /%3E%3C/svg%3E'),
@@ -352,7 +367,6 @@ canvas {
   position: absolute;
   left: 0;
   top: 0.2em;
-  /* transform: translateY(-50%); */
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.5);
   pointer-events: none;

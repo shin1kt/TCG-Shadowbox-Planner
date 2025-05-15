@@ -12,5 +12,6 @@ export type ErasePath = {
   startY: number;
   endX: number;
   endY: number;
+  radius: number; // 消しゴムの半径
 };
 export type ErasePaths = ErasePath[];

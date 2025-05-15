@@ -1,5 +1,5 @@
 <template>
-  <v-container class="mt-15">
+  <v-container>
     <v-row>
       <v-col cols="auto">
         <v-btn

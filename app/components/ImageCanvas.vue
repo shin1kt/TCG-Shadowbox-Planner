@@ -21,22 +21,6 @@
     </v-card-title>
 
     <v-card-text class="canvas-container pa-0">
-      <!-- 市松模様のSVGパターン定義 -->
-      <svg width="0" height="0" style="position: absolute">
-        <defs>
-          <pattern
-            id="checkered"
-            width="16"
-            height="16"
-            patternUnits="userSpaceOnUse"
-          >
-            <rect width="8" height="8" fill="#ffffff" />
-            <rect x="8" y="0" width="8" height="8" fill="#e0e0e0" />
-            <rect x="0" y="8" width="8" height="8" fill="#e0e0e0" />
-            <rect x="8" y="8" width="8" height="8" fill="#ffffff" />
-          </pattern>
-        </defs>
-      </svg>
       <canvas
         ref="canvasRef"
         :width="canvasWidth"

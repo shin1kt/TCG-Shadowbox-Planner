@@ -21,6 +21,22 @@
     </v-card-title>
 
     <v-card-text class="canvas-container pa-0">
+      <!-- 市松模様のSVGパターン定義 -->
+      <svg width="0" height="0" style="position: absolute">
+        <defs>
+          <pattern
+            id="checkered"
+            width="16"
+            height="16"
+            patternUnits="userSpaceOnUse"
+          >
+            <rect width="8" height="8" fill="#ffffff" />
+            <rect x="8" y="0" width="8" height="8" fill="#e0e0e0" />
+            <rect x="0" y="8" width="8" height="8" fill="#e0e0e0" />
+            <rect x="8" y="8" width="8" height="8" fill="#ffffff" />
+          </pattern>
+        </defs>
+      </svg>
       <canvas
         ref="canvasRef"
         :width="canvasWidth"
@@ -346,7 +362,9 @@ const updateTitle = (newTitle: string) => {
 <style scoped>
 canvas {
   border: 1px solid #ccc;
-  background-color: #f0f0f0; /* 薄いグレーの背景色を設定 */
+  background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='8' height='8' fill='%23ffffff'/%3E%3Crect x='8' y='0' width='8' height='8' fill='%23e0e0e0'/%3E%3Crect x='0' y='8' width='8' height='8' fill='%23e0e0e0'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23ffffff'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 16px 16px;
 }
 .erase-cursor {
   cursor: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"%3E%3Ccircle cx="25" cy="25" r="25" fill="rgba(0, 0, 0, 0.5)" /%3E%3C/svg%3E'),

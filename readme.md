@@ -18,6 +18,43 @@ This app provides a convenient way to refine your TCG shadowbox creations, ensur
 
 The application is live and accessible at: https://shin1kt.github.io/TCG-Shadowbox-Planner/
 
+### For Developers
+
+#### Development Environment (Docker)
+- Use `npm run dev` for regular development
+- Switch to `npm run preview` (after `npm run build`) when you need to check i18n (multilingual) functionality
+  - Note: Due to a known issue with `@nuxtjs/i18n` beta version, language switching may not work correctly in development mode
+
+##### Docker Compose Configuration Examples
+
+For development mode (default):
+```yaml
+services:
+  nuxt:
+    container_name: nuxt
+    build: docker
+    volumes:
+      - ./app:/app:cached
+    ports:
+      - "3333:3000"
+    tty: true
+    command: sh -c "npm install && npm run dev"
+```
+
+For preview mode (when checking i18n):
+```yaml
+services:
+  nuxt:
+    container_name: nuxt
+    build: docker
+    volumes:
+      - ./app:/app:cached
+    ports:
+      - "3333:3000"
+    tty: true
+    command: sh -c "npm install && npm run build && npm run preview"
+```
+
 ### Help Guide
 
 #### 1. Upload Images

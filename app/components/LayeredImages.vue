@@ -103,38 +103,29 @@ const drawImages = () => {
   textures.length = 0;
 
   // 既存のメッシュを削除
-  meshes.forEach(
-    (
-      mesh:
-        | THREE.Mesh<
-            THREE.BufferGeometry,
-            THREE.MeshBasicMaterial | THREE.MeshBasicMaterial[]
-          >
-        | THREE.LineSegments
-    ) => {
-      if (scene) {
-        scene.remove(mesh);
-        if (mesh instanceof THREE.Mesh) {
-          mesh.geometry.dispose();
-          if (Array.isArray(mesh.material)) {
-            mesh.material.forEach((m) => {
-              if (m.map) {
-                m.map.dispose();
-              }
-              m.dispose();
-            });
-          } else {
-            if (mesh.material.map) {
-              mesh.material.map.dispose();
+  meshes.forEach((mesh) => {
+    if (scene) {
+      scene.remove(mesh);
+      if (mesh instanceof THREE.Mesh) {
+        mesh.geometry.dispose();
+        if (Array.isArray(mesh.material)) {
+          mesh.material.forEach((m) => {
+            if (m.map) {
+              m.map.dispose();
             }
-            mesh.material.dispose();
+            m.dispose();
+          });
+        } else {
+          if (mesh.material.map) {
+            mesh.material.map.dispose();
           }
-        } else if (mesh instanceof THREE.LineSegments) {
-          mesh.geometry.dispose();
+          mesh.material.dispose();
         }
+      } else if (mesh instanceof THREE.LineSegments) {
+        mesh.geometry.dispose();
       }
     }
-  );
+  });
   meshes.length = 0;
 
   // 画像を順番に描画（インデックスが小さい順＝後ろから描画）
@@ -144,7 +135,7 @@ const drawImages = () => {
     const texture = new THREE.Texture(imageObj.img);
     texture.needsUpdate = true;
     texture.colorSpace = THREE.SRGBColorSpace;
-    textures.push(texture); // テクスチャを追跡配列に追加
+    textures.push(texture);
 
     const material = new THREE.MeshBasicMaterial({
       map: texture,
@@ -160,17 +151,22 @@ const drawImages = () => {
     // 画像サイズに基づいてジオメトリを作成
     const maxDimension = Math.max(imageObj.width, imageObj.height);
     const scale = 20 / maxDimension;
-
     const geometry = new THREE.PlaneGeometry(
       imageObj.width * scale,
       imageObj.height * scale
     );
 
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.z = -index * layerDistance.value;
+    // 前面の画像
+    const frontMesh = new THREE.Mesh(geometry, material);
+    frontMesh.position.z = -index * layerDistance.value;
 
-    scene.add(mesh);
-    meshes.push(mesh);
+    // 背面の画像（厚みを表現するため）
+    const backMesh = new THREE.Mesh(geometry, material.clone());
+    backMesh.position.z = frontMesh.position.z - 0.05; // 0.05の間隔で重ねる
+
+    scene.add(frontMesh);
+    scene.add(backMesh);
+    meshes.push(frontMesh, backMesh);
   });
 
   // カメラの位置を調整

@@ -160,9 +160,17 @@ const drawImages = () => {
     frontMesh.position.z = -index * layerDistance.value;
     frontMesh.renderOrder = props.modelValue.length - index;
 
-    // 背面の画像（厚みを表現するため）
-    const backMaterial = material.clone();
-    backMaterial.opacity = material.opacity;
+    // 背面の画像（黒い断面を表現するため）
+    const backMaterial = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      depthTest: true,
+      opacity: material.opacity,
+      alphaMap: texture,
+      alphaTest: 0.001,
+    });
     const backMesh = new THREE.Mesh(geometry, backMaterial);
     backMesh.position.z = frontMesh.position.z - 0.05;
     backMesh.renderOrder = frontMesh.renderOrder - 0.5;

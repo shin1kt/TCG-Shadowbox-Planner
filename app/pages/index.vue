@@ -98,7 +98,7 @@
                 <LayeredImages
                   v-model="imageList"
                   ref="layeredImagesRef"
-                  :selected-index="selectedStackImages"
+                  :selected-indices="selectedStackImages"
                 />
               </v-card-text>
               <v-card-actions class="layer-buttons">

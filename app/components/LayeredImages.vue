@@ -32,7 +32,7 @@ const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: ImageDataObject[];
-  selectedIndex?: number[]; // 選択されたレイヤーのインデックスの配列
+  selectedIndices?: number[]; // 選択されたレイヤーのインデックスの配列
 }>();
 
 // 調整可能なパラメータ
@@ -62,7 +62,7 @@ const redraw = () => {
 
 // プロパティの変更を監視
 watch(
-  [layerDistance, () => props.selectedIndex, () => props.modelValue],
+  [layerDistance, () => props.selectedIndices, () => props.modelValue],
   () => {
     nextTick(() => {
       drawImages();
@@ -130,7 +130,7 @@ const drawImages = () => {
     textures.push(texture);
 
     // レイヤーの選択状態に応じて透明度を設定
-    const isSelected = props.selectedIndex?.includes(index) ?? true;
+    const isSelected = props.selectedIndices?.includes(index) ?? true;
     const opacity = isSelected ? 1.0 : 0.05;
 
     const material = new THREE.MeshBasicMaterial({

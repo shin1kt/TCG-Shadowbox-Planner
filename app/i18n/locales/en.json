@@ -70,7 +70,7 @@
     },
     "preview": {
       "title": "3D View",
-      "content": "In the 3D view tab, you can check how layers stack together.\nUse mouse or touch controls to change the viewpoint."
+      "content": "In the 3D view tab, you can check how layers stack together.\nUse mouse or touch controls to change the viewpoint.\nYou can toggle the visibility of each layer to check part placement."
     },
     "export": {
       "title": "Export",

@@ -5,6 +5,7 @@ export interface ImageDataObject {
   erasePaths: ErasePaths;
   editedDataUrl: string; // 編集後の画像データURL
   title: string; // 画像のタイトル
+  id: string; // ユニークなID
 }
 
 export type ErasePath = {

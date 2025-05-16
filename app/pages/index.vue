@@ -101,29 +101,33 @@
                   :selected-index="selectedStackImages"
                 />
               </v-card-text>
-              <v-card-actions>
-                <v-row>
-                  <v-col
-                    v-for="(image, index) in imageList"
-                    :key="image.id"
-                    cols="auto"
-                  >
-                    <v-btn
-                      size="small"
-                      :color="
-                        selectedStackImages.includes(index) ? 'primary' : ''
-                      "
-                      :variant="
-                        selectedStackImages.includes(index)
-                          ? 'elevated'
-                          : 'outlined'
-                      "
-                      @click="toggleStackImage(index)"
+              <v-card-actions class="layer-buttons">
+                <v-container class="pa-2">
+                  <v-row dense>
+                    <v-col
+                      cols="12"
+                      v-for="(image, index) in imageList"
+                      :key="image.id"
                     >
-                      {{ image.title }}
-                    </v-btn>
-                  </v-col>
-                </v-row>
+                      <v-btn
+                        size="small"
+                        block
+                        class="mb-1"
+                        :color="
+                          selectedStackImages.includes(index) ? 'primary' : ''
+                        "
+                        :variant="
+                          selectedStackImages.includes(index)
+                            ? 'elevated'
+                            : 'outlined'
+                        "
+                        @click="toggleStackImage(index)"
+                      >
+                        {{ image.title }}
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </v-container>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -400,5 +404,19 @@ onMounted(() => {
 
 .v-window-item {
   height: 100%;
+}
+
+.layer-buttons {
+  justify-content: center;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.layer-buttons .v-container {
+  padding: 8px !important;
+}
+
+.layer-buttons .v-btn {
+  margin-bottom: 4px;
 }
 </style>

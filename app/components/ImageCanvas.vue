@@ -10,6 +10,24 @@
         @update:model-value="updateTitle"
       ></v-text-field>
       <v-btn
+        icon="mdi-magnify-plus"
+        size="small"
+        :color="scale === 2 ? 'grey-darken-3' : 'grey-lighten-1'"
+        :disabled="scale === 2"
+        @click="zoomIn"
+        class="zoom-button ml-2"
+      >
+      </v-btn>
+      <v-btn
+        icon="mdi-magnify-minus"
+        size="small"
+        :color="scale === 1 ? 'grey-darken-3' : 'grey-lighten-1'"
+        :disabled="scale === 1"
+        @click="zoomOut"
+        class="zoom-button ml-2"
+      >
+      </v-btn>
+      <v-btn
         icon="mdi-undo"
         size="small"
         :color="undoCounts.length === 0 ? 'grey-darken-3' : 'grey-lighten-1'"
@@ -21,18 +39,21 @@
     </v-card-title>
 
     <v-card-text class="canvas-container pa-0">
-      <canvas
-        ref="canvasRef"
-        :width="canvasWidth"
-        :height="canvasHeight"
-        class="checkered-background"
-        :style="{
-          width: `${canvasWidth}px`,
-          height: `${canvasHeight}px`,
-          display: 'block',
-          margin: '0 auto',
-        }"
-      ></canvas>
+      <div class="canvas-scroll-container">
+        <div class="canvas-wrapper">
+          <canvas
+            ref="canvasRef"
+            :width="canvasWidth"
+            :height="canvasHeight"
+            class="checkered-background"
+            :style="{
+              width: `${canvasWidth * scale}px`,
+              height: `${canvasHeight * scale}px`,
+              display: 'block',
+            }"
+          ></canvas>
+        </div>
+      </div>
     </v-card-text>
     <v-card-text>
       <div class="erase-size-container">
@@ -89,14 +110,16 @@ const isErasing = ref(false); // マウスボタンが押されているかど�
 const undoCounts = ref<number[]>([]);
 const currentEraseCount = ref(0); // 現在の消去作業のカウントを保持する変数を追加
 
+const scale = ref(1);
+
 // キャンバスの実際のサイズと表示サイズの比率を計算
 const canvasScale = computed(() => {
   if (!canvasRef.value || !originData.value) return { scaleX: 1, scaleY: 1 };
 
   const rect = canvasRef.value.getBoundingClientRect();
   return {
-    scaleX: originData.value.width / rect.width,
-    scaleY: originData.value.height / rect.height,
+    scaleX: (originData.value.width * scale.value) / rect.width,
+    scaleY: (originData.value.height * scale.value) / rect.height,
   };
 });
 
@@ -228,14 +251,15 @@ const handleEraseMouse = (
     clientX = event.touches[0].clientX;
     clientY = event.touches[0].clientY;
   } else {
-    // スクロール位置の計算を修正
     clientX = event.clientX;
     clientY = event.clientY;
   }
 
-  // キャンバス上の正確な位置を計算
-  const mouseX = ((clientX - rect.left) / rect.width) * originData.value.width;
-  const mouseY = ((clientY - rect.top) / rect.height) * originData.value.height;
+  // スケールを考慮した座標計算
+  const mouseX =
+    ((clientX - rect.left) * canvasScale.value.scaleX) / scale.value;
+  const mouseY =
+    ((clientY - rect.top) * canvasScale.value.scaleY) / scale.value;
 
   handleErase(mouseX, mouseY, isNewPath);
 };
@@ -342,14 +366,29 @@ const updateTitle = (newTitle: string) => {
     originData.value.title = newTitle;
   }
 };
+
+const zoomIn = () => {
+  if (scale.value < 2) {
+    scale.value = 2;
+    redrawCanvas();
+  }
+};
+
+const zoomOut = () => {
+  if (scale.value > 1) {
+    scale.value = 1;
+    redrawCanvas();
+  }
+};
 </script>
 
 <style scoped>
 canvas {
   border: 1px solid #ccc;
+  display: block;
 }
 canvas.checkered-background {
-  background-color: transparent !important; /* 背景を強制的に透明に */
+  background-color: transparent !important;
 }
 .erase-cursor {
   cursor: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"%3E%3Ccircle cx="25" cy="25" r="25" fill="rgba(0, 0, 0, 0.5)" /%3E%3C/svg%3E'),
@@ -357,10 +396,28 @@ canvas.checkered-background {
 }
 .canvas-container {
   overflow: hidden;
+  position: relative;
+  height: 70vh;
+  padding: 0;
+  margin: 0;
+}
+.canvas-scroll-container {
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.canvas-wrapper {
+  min-width: max-content;
+  min-height: max-content;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  padding: 20px;
+  margin: 0 auto;
 }
 .erase-size-container {
   position: relative;
@@ -379,6 +436,16 @@ canvas.checkered-background {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .undo-button:hover {
+  background-color: #f5f5f5 !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+.zoom-button {
+  background-color: white !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.zoom-button:hover {
   background-color: #f5f5f5 !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transform: translateY(-1px);

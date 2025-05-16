@@ -13,6 +13,7 @@
 
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
+import { v4 as uuidv4 } from "uuid";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
 
 const { t } = useI18n();
@@ -64,8 +65,7 @@ const handleFileChange = (event: Event) => {
           erasePaths: [],
           editedDataUrl: img.src,
           title: file.name,
-          // ユニークなIDを生成
-          id: crypto.randomUUID(),
+          id: uuidv4(),
         };
 
         // ImageObjectをemit

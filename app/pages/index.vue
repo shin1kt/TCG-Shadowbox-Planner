@@ -151,6 +151,7 @@
 
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
+import { v4 as uuidv4 } from "uuid";
 import type { ImageDataObject } from "@/types/imageData"; // 型をインポート
 
 const { t } = useI18n();
@@ -196,15 +197,19 @@ watch(activeTab, (newTab) => {
 
 // 画像がアップロードされたときに呼ばれる関数
 const handleFileUpload = (imageData: ImageDataObject) => {
-  // タイトルがすでにimageListに存在する場合は、新しいタイトルを生成
-  // 添字の数字を1ずつ増やしていく
-  const title = imageData.title;
-  const index = imageList.value.findIndex((img) => img.title === title);
-  if (index !== -1) {
-    imageData.title = `${title} (${index + 1})`;
+  // タイトルの重複をチェックし、ユニークなタイトルを生成
+  let baseTitle = imageData.title;
+  let newTitle = baseTitle;
+  let counter = 1;
+
+  while (imageList.value.some((img) => img.title === newTitle)) {
+    newTitle = `${baseTitle} (${counter})`;
+    counter++;
   }
 
+  imageData.title = newTitle;
   imageList.value.unshift(imageData); // 配列の先頭に追加
+
   // 新しい画像を選択状態に追加
   selectedStackImages.value = [
     0,
@@ -226,8 +231,8 @@ const duplicateImage = (index: number) => {
   const imageToDuplicate = imageList.value[index];
   const duplicatedImage = {
     ...imageToDuplicate,
-    id: crypto.randomUUID(), // 新しいIDを生成
-    title: `${imageToDuplicate.title} (copy)`, // コピーであることを明示
+    id: uuidv4(), // 新しいIDを生成
+    title: `${imageToDuplicate.title} (copy)`,
   };
   imageList.value.splice(index + 1, 0, duplicatedImage);
 };

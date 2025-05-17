@@ -6,33 +6,56 @@
         variant="text"
         @click="toggleEraseMode"
         class="erase-mode-button ml-2"
+        :aria-label="
+          isEraseMode ? t('buttons.eraseMode') : t('buttons.moveMode')
+        "
         >{{ isEraseMode ? "編集中" : "移動" }}
       </v-btn>
 
-      <v-btn
-        icon="mdi-magnify-plus"
-        size="small"
-        :disabled="scale === 2"
-        @click="zoomIn"
-        class="zoom-button ml-2"
-      >
-      </v-btn>
-      <v-btn
-        icon="mdi-magnify-minus"
-        size="small"
-        :disabled="scale === 1"
-        @click="zoomOut"
-        class="zoom-button ml-2"
-      >
-      </v-btn>
-      <v-btn
-        icon="mdi-undo"
-        size="small"
-        :disabled="undoCounts.length === 0"
-        @click="undo(1)"
-        class="undo-button ml-2"
-      >
-      </v-btn>
+      <v-tooltip :text="t('imageCanvas.zoomIn')" :touch="false">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            v-bind="props"
+            icon="mdi-magnify-plus"
+            size="small"
+            :disabled="scale === 2"
+            @click="zoomIn"
+            class="zoom-button ml-2"
+            :aria-label="t('imageCanvas.zoomIn')"
+          >
+          </v-btn>
+        </template>
+      </v-tooltip>
+
+      <v-tooltip :text="t('imageCanvas.zoomOut')" :touch="false">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            v-bind="props"
+            icon="mdi-magnify-minus"
+            size="small"
+            :disabled="scale === 1"
+            @click="zoomOut"
+            class="zoom-button ml-2"
+            :aria-label="t('imageCanvas.zoomOut')"
+          >
+          </v-btn>
+        </template>
+      </v-tooltip>
+
+      <v-tooltip :text="t('imageCanvas.undo')" :touch="false">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            v-bind="props"
+            icon="mdi-undo"
+            size="small"
+            :disabled="undoCounts.length === 0"
+            @click="undo(1)"
+            class="undo-button ml-2"
+            :aria-label="t('imageCanvas.undo')"
+          >
+          </v-btn>
+        </template>
+      </v-tooltip>
     </v-card-actions>
     <v-card-title class="text-subtitle-1 d-flex flex-row align-center">
       <v-text-field
@@ -278,29 +301,32 @@ const handleEraseMouse = (
   handleErase(mouseX, mouseY, isNewPath);
 };
 
+// 高階関数でガード節を共通化
+const withEraseModeGuard = (handler: Function) => (event?: any) => {
+  if (!isEraseMode.value) return;
+  handler(event);
+};
+
 // マウスダウン・マウスムーブ・マウスアップイベントで消去処理を行う
 const startErase = () => {
   if (!canvasRef.value) return;
 
   const canvas = canvasRef.value;
 
-  const handleMouseDown = (event: MouseEvent) => {
-    if (!isEraseMode.value) return;
+  const handleMouseDown = withEraseModeGuard((event: MouseEvent) => {
     isErasing.value = true;
     handleEraseMouse(event, true);
     currentEraseCount.value = 1;
-  };
+  });
 
-  const handleMouseMove = (event: MouseEvent) => {
-    if (!isEraseMode.value) return;
+  const handleMouseMove = withEraseModeGuard((event: MouseEvent) => {
     if (isErasing.value) {
       handleEraseMouse(event, false);
       currentEraseCount.value++;
     }
-  };
+  });
 
-  const handleMouseUp = () => {
-    if (!isEraseMode.value) return;
+  const handleEndErase = () => {
     isErasing.value = false;
     if (currentEraseCount.value > 0) {
       undoCounts.value.push(currentEraseCount.value);
@@ -308,14 +334,8 @@ const startErase = () => {
     currentEraseCount.value = 0;
   };
 
-  const handleMouseOut = () => {
-    if (!isEraseMode.value) return;
-    isErasing.value = false;
-    if (currentEraseCount.value > 0) {
-      undoCounts.value.push(currentEraseCount.value);
-    }
-    currentEraseCount.value = 0;
-  };
+  const handleMouseUp = withEraseModeGuard(handleEndErase);
+  const handleMouseOut = withEraseModeGuard(handleEndErase);
 
   const handleTouchStart = (event: TouchEvent) => {
     if (!isEraseMode.value) return;
@@ -453,14 +473,4 @@ canvas.checkered-background {
 .undo-button {
   background-color: #f5f5f5 !important;
 }
-/*
-.zoom-button:hover,
-.erase-mode-button:hover,
-.undo-button:hover {
-  background-color: #e0e0e0 !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transform: translateY(-1px);
-  transition: all 0.2s ease;
-}
-*/
 </style>

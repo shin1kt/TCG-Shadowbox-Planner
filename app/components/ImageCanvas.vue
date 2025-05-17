@@ -12,7 +12,11 @@
         >{{ isEraseMode ? "編集中" : "移動" }}
       </v-btn>
 
-      <v-tooltip :text="t('imageCanvas.zoomIn')" :touch="false">
+      <v-tooltip
+        :text="t('imageCanvas.zoomIn')"
+        :touch="false"
+        class="desktop-only"
+      >
         <template v-slot:activator="{ props }">
           <v-btn
             v-bind="props"
@@ -27,7 +31,11 @@
         </template>
       </v-tooltip>
 
-      <v-tooltip :text="t('imageCanvas.zoomOut')" :touch="false">
+      <v-tooltip
+        :text="t('imageCanvas.zoomOut')"
+        :touch="false"
+        class="desktop-only"
+      >
         <template v-slot:activator="{ props }">
           <v-btn
             v-bind="props"
@@ -42,7 +50,11 @@
         </template>
       </v-tooltip>
 
-      <v-tooltip :text="t('imageCanvas.undo')" :touch="false">
+      <v-tooltip
+        :text="t('imageCanvas.undo')"
+        :touch="false"
+        class="desktop-only"
+      >
         <template v-slot:activator="{ props }">
           <v-btn
             v-bind="props"
@@ -472,5 +484,10 @@ canvas.checkered-background {
 .erase-mode-button,
 .undo-button {
   background-color: #f5f5f5 !important;
+}
+@media (hover: none) and (pointer: coarse) {
+  .desktop-only {
+    display: none !important;
+  }
 }
 </style>

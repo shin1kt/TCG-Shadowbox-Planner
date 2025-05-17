@@ -1,6 +1,63 @@
 <template>
   <v-card>
-    <v-card-title class="text-subtitle-1 d-flex align-center">
+    <v-card-actions>
+      <v-btn
+        :prepend-icon="isEraseMode ? 'mdi-eraser' : 'mdi-arrow-all'"
+        variant="text"
+        @click="toggleEraseMode"
+        class="erase-mode-button ml-2"
+        :aria-label="
+          isEraseMode ? t('buttons.eraseMode') : t('buttons.moveMode')
+        "
+        >{{ isEraseMode ? "編集中" : "移動" }}
+      </v-btn>
+
+      <v-tooltip :text="t('imageCanvas.zoomIn')" :touch="false">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            v-bind="props"
+            icon="mdi-magnify-plus"
+            size="small"
+            :disabled="scale === 2"
+            @click="zoomIn"
+            class="zoom-button ml-2"
+            :aria-label="t('imageCanvas.zoomIn')"
+          >
+          </v-btn>
+        </template>
+      </v-tooltip>
+
+      <v-tooltip :text="t('imageCanvas.zoomOut')" :touch="false">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            v-bind="props"
+            icon="mdi-magnify-minus"
+            size="small"
+            :disabled="scale === 1"
+            @click="zoomOut"
+            class="zoom-button ml-2"
+            :aria-label="t('imageCanvas.zoomOut')"
+          >
+          </v-btn>
+        </template>
+      </v-tooltip>
+
+      <v-tooltip :text="t('imageCanvas.undo')" :touch="false">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            v-bind="props"
+            icon="mdi-undo"
+            size="small"
+            :disabled="undoCounts.length === 0"
+            @click="undo(1)"
+            class="undo-button ml-2"
+            :aria-label="t('imageCanvas.undo')"
+          >
+          </v-btn>
+        </template>
+      </v-tooltip>
+    </v-card-actions>
+    <v-card-title class="text-subtitle-1 d-flex flex-row align-center">
       <v-text-field
         v-model="title"
         variant="plain"
@@ -9,30 +66,24 @@
         class="pa-0 flex-grow-1"
         @update:model-value="updateTitle"
       ></v-text-field>
-      <v-btn
-        icon="mdi-undo"
-        size="small"
-        :color="undoCounts.length === 0 ? 'grey-darken-3' : 'grey-lighten-1'"
-        :disabled="undoCounts.length === 0"
-        @click="undo(1)"
-        class="undo-button ml-2"
-      >
-      </v-btn>
     </v-card-title>
 
     <v-card-text class="canvas-container pa-0">
-      <canvas
-        ref="canvasRef"
-        :width="canvasWidth"
-        :height="canvasHeight"
-        class="checkered-background"
-        :style="{
-          width: `${canvasWidth}px`,
-          height: `${canvasHeight}px`,
-          display: 'block',
-          margin: '0 auto',
-        }"
-      ></canvas>
+      <div class="canvas-scroll-container">
+        <div class="canvas-wrapper">
+          <canvas
+            ref="canvasRef"
+            :width="canvasWidth"
+            :height="canvasHeight"
+            :class="['checkered-background', { 'erase-cursor': isEraseMode }]"
+            :style="{
+              width: `${canvasWidth * scale}px`,
+              height: `${canvasHeight * scale}px`,
+              display: 'block',
+            }"
+          ></canvas>
+        </div>
+      </div>
     </v-card-text>
     <v-card-text>
       <div class="erase-size-container">
@@ -89,14 +140,18 @@ const isErasing = ref(false); // マウスボタンが押されているかど�
 const undoCounts = ref<number[]>([]);
 const currentEraseCount = ref(0); // 現在の消去作業のカウントを保持する変数を追加
 
+const scale = ref(1);
+
+const isEraseMode = ref(true); // デフォルトで消去モードON
+
 // キャンバスの実際のサイズと表示サイズの比率を計算
 const canvasScale = computed(() => {
   if (!canvasRef.value || !originData.value) return { scaleX: 1, scaleY: 1 };
 
   const rect = canvasRef.value.getBoundingClientRect();
   return {
-    scaleX: originData.value.width / rect.width,
-    scaleY: originData.value.height / rect.height,
+    scaleX: (originData.value.width * scale.value) / rect.width,
+    scaleY: (originData.value.height * scale.value) / rect.height,
   };
 });
 
@@ -211,12 +266,17 @@ watch(
   }
 );
 
+// 消去モードの切り替え
+const toggleEraseMode = () => {
+  isEraseMode.value = !isEraseMode.value;
+};
+
 // キャンバスの消去処理（クリックした部分を透過）
 const handleEraseMouse = (
   event: MouseEvent | TouchEvent,
   isNewPath: boolean = false
 ) => {
-  if (!isErasing.value) return;
+  if (!isEraseMode.value || !isErasing.value) return;
 
   const rect = canvasRef.value?.getBoundingClientRect();
   if (!rect || !ctx.value || !originData.value) return;
@@ -228,16 +288,23 @@ const handleEraseMouse = (
     clientX = event.touches[0].clientX;
     clientY = event.touches[0].clientY;
   } else {
-    // スクロール位置の計算を修正
     clientX = event.clientX;
     clientY = event.clientY;
   }
 
-  // キャンバス上の正確な位置を計算
-  const mouseX = ((clientX - rect.left) / rect.width) * originData.value.width;
-  const mouseY = ((clientY - rect.top) / rect.height) * originData.value.height;
+  // スケールを考慮した座標計算
+  const mouseX =
+    ((clientX - rect.left) * canvasScale.value.scaleX) / scale.value;
+  const mouseY =
+    ((clientY - rect.top) * canvasScale.value.scaleY) / scale.value;
 
   handleErase(mouseX, mouseY, isNewPath);
+};
+
+// 高階関数でガード節を共通化
+const withEraseModeGuard = (handler: Function) => (event?: any) => {
+  if (!isEraseMode.value) return;
+  handler(event);
 };
 
 // マウスダウン・マウスムーブ・マウスアップイベントで消去処理を行う
@@ -246,60 +313,54 @@ const startErase = () => {
 
   const canvas = canvasRef.value;
 
-  const handleMouseDown = (event: MouseEvent) => {
+  const handleMouseDown = withEraseModeGuard((event: MouseEvent) => {
     isErasing.value = true;
-    canvas.classList.add("erase-cursor");
     handleEraseMouse(event, true);
-    currentEraseCount.value = 1; // 初回のeraseでカウントを1に設定
-  };
+    currentEraseCount.value = 1;
+  });
 
-  const handleMouseMove = (event: MouseEvent) => {
+  const handleMouseMove = withEraseModeGuard((event: MouseEvent) => {
     if (isErasing.value) {
       handleEraseMouse(event, false);
-      currentEraseCount.value++; // 現在のカウントを増やす
+      currentEraseCount.value++;
     }
-  };
+  });
 
-  const handleMouseUp = () => {
+  const handleEndErase = () => {
     isErasing.value = false;
-    canvas.classList.remove("erase-cursor");
     if (currentEraseCount.value > 0) {
-      undoCounts.value.push(currentEraseCount.value); // 消去作業が完了した時点でundoCountsに追加
+      undoCounts.value.push(currentEraseCount.value);
     }
-    currentEraseCount.value = 0; // カウントをリセット
+    currentEraseCount.value = 0;
   };
 
-  const handleMouseOut = () => {
-    isErasing.value = false;
-    canvas.classList.remove("erase-cursor");
-    if (currentEraseCount.value > 0) {
-      undoCounts.value.push(currentEraseCount.value); // マウスが外れた時点でもundoCountsに追加
-    }
-    currentEraseCount.value = 0; // カウントをリセット
-  };
+  const handleMouseUp = withEraseModeGuard(handleEndErase);
+  const handleMouseOut = withEraseModeGuard(handleEndErase);
 
-  // タッチイベントハンドラー
   const handleTouchStart = (event: TouchEvent) => {
+    if (!isEraseMode.value) return;
     event.preventDefault();
     isErasing.value = true;
     handleEraseMouse(event, true);
-    currentEraseCount.value = 1; // 初回のeraseでカウントを1に設定
+    currentEraseCount.value = 1;
   };
 
   const handleTouchMove = (event: TouchEvent) => {
+    if (!isEraseMode.value) return;
     event.preventDefault();
     if (isErasing.value) {
       handleEraseMouse(event, false);
-      currentEraseCount.value++; // 現在のカウントを増やす
+      currentEraseCount.value++;
     }
   };
 
   const handleTouchEnd = () => {
+    if (!isEraseMode.value) return;
     isErasing.value = false;
     if (currentEraseCount.value > 0) {
-      undoCounts.value.push(currentEraseCount.value); // タッチ終了時点でundoCountsに追加
+      undoCounts.value.push(currentEraseCount.value);
     }
-    currentEraseCount.value = 0; // カウントをリセット
+    currentEraseCount.value = 0;
   };
 
   // マウスイベントリスナーを追加
@@ -342,14 +403,29 @@ const updateTitle = (newTitle: string) => {
     originData.value.title = newTitle;
   }
 };
+
+const zoomIn = () => {
+  if (scale.value < 2) {
+    scale.value = 2;
+    redrawCanvas();
+  }
+};
+
+const zoomOut = () => {
+  if (scale.value > 1) {
+    scale.value = 1;
+    redrawCanvas();
+  }
+};
 </script>
 
 <style scoped>
 canvas {
   border: 1px solid #ccc;
+  display: block;
 }
 canvas.checkered-background {
-  background-color: transparent !important; /* 背景を強制的に透明に */
+  background-color: transparent !important;
 }
 .erase-cursor {
   cursor: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"%3E%3Ccircle cx="25" cy="25" r="25" fill="rgba(0, 0, 0, 0.5)" /%3E%3C/svg%3E'),
@@ -357,10 +433,28 @@ canvas.checkered-background {
 }
 .canvas-container {
   overflow: hidden;
+  position: relative;
+  height: 70vh;
+  padding: 0;
+  margin: 0;
+}
+.canvas-scroll-container {
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.canvas-wrapper {
+  min-width: max-content;
+  min-height: max-content;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  padding: 20px;
+  margin: 0 auto;
 }
 .erase-size-container {
   position: relative;
@@ -374,14 +468,9 @@ canvas.checkered-background {
   background-color: rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
+.zoom-button,
+.erase-mode-button,
 .undo-button {
-  background-color: white !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.undo-button:hover {
   background-color: #f5f5f5 !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transform: translateY(-1px);
-  transition: all 0.2s ease;
 }
 </style>

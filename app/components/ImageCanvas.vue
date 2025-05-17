@@ -1,18 +1,17 @@
 <template>
   <v-card>
-    <v-card-title class="text-subtitle-1 d-flex align-center">
-      <v-text-field
-        v-model="title"
-        variant="plain"
-        hide-details
-        density="compact"
-        class="pa-0 flex-grow-1"
-        @update:model-value="updateTitle"
-      ></v-text-field>
+    <v-card-actions>
+      <v-btn
+        :prepend-icon="isEraseMode ? 'mdi-eraser' : 'mdi-arrow-all'"
+        variant="text"
+        @click="toggleEraseMode"
+        class="erase-mode-button ml-2"
+        >{{ isEraseMode ? "編集中" : "移動" }}
+      </v-btn>
+
       <v-btn
         icon="mdi-magnify-plus"
         size="small"
-        :color="scale === 2 ? 'grey-darken-3' : 'grey-lighten-1'"
         :disabled="scale === 2"
         @click="zoomIn"
         class="zoom-button ml-2"
@@ -21,7 +20,6 @@
       <v-btn
         icon="mdi-magnify-minus"
         size="small"
-        :color="scale === 1 ? 'grey-darken-3' : 'grey-lighten-1'"
         :disabled="scale === 1"
         @click="zoomOut"
         class="zoom-button ml-2"
@@ -30,12 +28,21 @@
       <v-btn
         icon="mdi-undo"
         size="small"
-        :color="undoCounts.length === 0 ? 'grey-darken-3' : 'grey-lighten-1'"
         :disabled="undoCounts.length === 0"
         @click="undo(1)"
         class="undo-button ml-2"
       >
       </v-btn>
+    </v-card-actions>
+    <v-card-title class="text-subtitle-1 d-flex flex-row align-center">
+      <v-text-field
+        v-model="title"
+        variant="plain"
+        hide-details
+        density="compact"
+        class="pa-0 flex-grow-1"
+        @update:model-value="updateTitle"
+      ></v-text-field>
     </v-card-title>
 
     <v-card-text class="canvas-container pa-0">
@@ -45,7 +52,7 @@
             ref="canvasRef"
             :width="canvasWidth"
             :height="canvasHeight"
-            class="checkered-background"
+            :class="['checkered-background', { 'erase-cursor': isEraseMode }]"
             :style="{
               width: `${canvasWidth * scale}px`,
               height: `${canvasHeight * scale}px`,
@@ -111,6 +118,8 @@ const undoCounts = ref<number[]>([]);
 const currentEraseCount = ref(0); // 現在の消去作業のカウントを保持する変数を追加
 
 const scale = ref(1);
+
+const isEraseMode = ref(true); // デフォルトで消去モードON
 
 // キャンバスの実際のサイズと表示サイズの比率を計算
 const canvasScale = computed(() => {
@@ -234,12 +243,17 @@ watch(
   }
 );
 
+// 消去モードの切り替え
+const toggleEraseMode = () => {
+  isEraseMode.value = !isEraseMode.value;
+};
+
 // キャンバスの消去処理（クリックした部分を透過）
 const handleEraseMouse = (
   event: MouseEvent | TouchEvent,
   isNewPath: boolean = false
 ) => {
-  if (!isErasing.value) return;
+  if (!isEraseMode.value || !isErasing.value) return;
 
   const rect = canvasRef.value?.getBoundingClientRect();
   if (!rect || !ctx.value || !originData.value) return;
@@ -271,59 +285,62 @@ const startErase = () => {
   const canvas = canvasRef.value;
 
   const handleMouseDown = (event: MouseEvent) => {
+    if (!isEraseMode.value) return;
     isErasing.value = true;
-    canvas.classList.add("erase-cursor");
     handleEraseMouse(event, true);
-    currentEraseCount.value = 1; // 初回のeraseでカウントを1に設定
+    currentEraseCount.value = 1;
   };
 
   const handleMouseMove = (event: MouseEvent) => {
+    if (!isEraseMode.value) return;
     if (isErasing.value) {
       handleEraseMouse(event, false);
-      currentEraseCount.value++; // 現在のカウントを増やす
+      currentEraseCount.value++;
     }
   };
 
   const handleMouseUp = () => {
+    if (!isEraseMode.value) return;
     isErasing.value = false;
-    canvas.classList.remove("erase-cursor");
     if (currentEraseCount.value > 0) {
-      undoCounts.value.push(currentEraseCount.value); // 消去作業が完了した時点でundoCountsに追加
+      undoCounts.value.push(currentEraseCount.value);
     }
-    currentEraseCount.value = 0; // カウントをリセット
+    currentEraseCount.value = 0;
   };
 
   const handleMouseOut = () => {
+    if (!isEraseMode.value) return;
     isErasing.value = false;
-    canvas.classList.remove("erase-cursor");
     if (currentEraseCount.value > 0) {
-      undoCounts.value.push(currentEraseCount.value); // マウスが外れた時点でもundoCountsに追加
+      undoCounts.value.push(currentEraseCount.value);
     }
-    currentEraseCount.value = 0; // カウントをリセット
+    currentEraseCount.value = 0;
   };
 
-  // タッチイベントハンドラー
   const handleTouchStart = (event: TouchEvent) => {
+    if (!isEraseMode.value) return;
     event.preventDefault();
     isErasing.value = true;
     handleEraseMouse(event, true);
-    currentEraseCount.value = 1; // 初回のeraseでカウントを1に設定
+    currentEraseCount.value = 1;
   };
 
   const handleTouchMove = (event: TouchEvent) => {
+    if (!isEraseMode.value) return;
     event.preventDefault();
     if (isErasing.value) {
       handleEraseMouse(event, false);
-      currentEraseCount.value++; // 現在のカウントを増やす
+      currentEraseCount.value++;
     }
   };
 
   const handleTouchEnd = () => {
+    if (!isEraseMode.value) return;
     isErasing.value = false;
     if (currentEraseCount.value > 0) {
-      undoCounts.value.push(currentEraseCount.value); // タッチ終了時点でundoCountsに追加
+      undoCounts.value.push(currentEraseCount.value);
     }
-    currentEraseCount.value = 0; // カウントをリセット
+    currentEraseCount.value = 0;
   };
 
   // マウスイベントリスナーを追加
@@ -431,24 +448,19 @@ canvas.checkered-background {
   background-color: rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
+.zoom-button,
+.erase-mode-button,
 .undo-button {
-  background-color: white !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #f5f5f5 !important;
 }
+/*
+.zoom-button:hover,
+.erase-mode-button:hover,
 .undo-button:hover {
-  background-color: #f5f5f5 !important;
+  background-color: #e0e0e0 !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transform: translateY(-1px);
   transition: all 0.2s ease;
 }
-.zoom-button {
-  background-color: white !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.zoom-button:hover {
-  background-color: #f5f5f5 !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transform: translateY(-1px);
-  transition: all 0.2s ease;
-}
+*/
 </style>

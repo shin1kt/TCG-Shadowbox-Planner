@@ -115,6 +115,12 @@ export const useAppMenu = () => {
       // 空文字の場合はデフォルト名を使用
       const finalFileName = fileName.trim() || defaultName;
 
+      // iPhone Safari用: ユーザージェスチャーのコンテキストを保持するため、
+      // リンク要素を先に作成して準備しておく
+      const link = document.createElement("a");
+      document.body.appendChild(link);
+      link.style.display = "none";
+
       // HTMLImageElementをBase64データURLに変換してJSONにシリアライズ可能にする
       const exportData = await Promise.all(
         imageList.value.map(async (imageData) => {
@@ -146,20 +152,78 @@ export const useAppMenu = () => {
         images: exportData,
       };
 
-      const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
+      const jsonString = JSON.stringify(jsonData, null, 2);
+      const blob = new Blob([jsonString], {
         type: "application/json",
       });
-      const url = URL.createObjectURL(blob);
 
-      const link = document.createElement("a");
-      link.href = url;
       // .jsonが含まれていない場合は追加
-      link.download = finalFileName.endsWith(".json")
+      const downloadFileName = finalFileName.endsWith(".json")
         ? finalFileName
         : `${finalFileName}.json`;
-      link.click();
 
-      URL.revokeObjectURL(url);
+      // iPhone Safari の検出とモバイルデバイス用の処理
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+
+      if (isIOS || isMobile) {
+        // モバイルデバイス（特にiPhone Safari）用の処理
+        try {
+          // Web Share API が利用可能な場合はそれを使用
+          if (navigator.share && "canShare" in navigator) {
+            const file = new File([blob], downloadFileName, {
+              type: "application/json",
+            });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                files: [file],
+                title: "TCG Shadowbox Data",
+              });
+              document.body.removeChild(link);
+              return;
+            }
+          }
+        } catch (shareError) {
+          console.log(
+            "Web Share API failed, falling back to download:",
+            shareError
+          );
+        }
+
+        // Web Share API が使えない場合の代替処理
+        // データURLを使用してダウンロード
+        const dataUrl = `data:application/json;charset=utf-8,${encodeURIComponent(
+          jsonString
+        )}`;
+        link.href = dataUrl;
+        link.download = downloadFileName;
+        link.click();
+
+        // 少し遅延してから要素を削除
+        setTimeout(() => {
+          if (document.body.contains(link)) {
+            document.body.removeChild(link);
+          }
+        }, 1000);
+      } else {
+        // デスクトップ用の処理（既存の方法）
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = downloadFileName;
+        link.click();
+
+        // クリーンアップ
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+          if (document.body.contains(link)) {
+            document.body.removeChild(link);
+          }
+        }, 100);
+      }
     } catch (error) {
       console.error("JSON export failed:", error);
       alert(t("errors.exportFailed"));

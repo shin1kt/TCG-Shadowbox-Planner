@@ -457,7 +457,16 @@ const zoomOut = () => {
   }
 };
 
-// 画像をキャンバスサイズにリサイズするユーティリティ関数
+/**
+ * 画像をキャンバスサイズにリサイズする
+ * アスペクト比を保持しながら画像をキャンバスサイズに合わせ、
+ * 中央配置で透明な背景に描画する
+ *
+ * @param imageDataURL - リサイズ対象の画像データURL
+ * @param targetWidth - 目標キャンバス幅（ピクセル）
+ * @param targetHeight - 目標キャンバス高さ（ピクセル）
+ * @returns Promise<string> - リサイズ後の画像データURL（PNG形式）
+ */
 const resizeImageToCanvasSize = (
   imageDataURL: string,
   targetWidth: number,

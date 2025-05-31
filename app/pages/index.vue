@@ -234,7 +234,7 @@ const duplicateImage = (index: number) => {
     id: uuidv4(), // 新しいIDを生成
     title: `${imageToDuplicate.title} (copy)`,
   };
-  imageList.value.splice(index + 1, 0, duplicatedImage);
+  imageList.value.splice(index, 0, duplicatedImage);
 };
 
 // 画像の位置を移動する

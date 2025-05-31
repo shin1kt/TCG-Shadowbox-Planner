@@ -9,7 +9,7 @@
         :aria-label="
           isEraseMode ? t('buttons.eraseMode') : t('buttons.moveMode')
         "
-        >{{ isEraseMode ? "編集中" : "移動" }}
+        >{{ isEraseMode ? "編集中4" : "移動" }}
       </v-btn>
 
       <v-tooltip
@@ -176,8 +176,7 @@ const eraseSizeStyle = computed(() => {
     };
 
   const rect = canvasRef.value.getBoundingClientRect();
-  const canvasDrawWidth = rect.width - CONSTANTS.CANVAS_BORDER_WIDTH * 2;
-  const size = (eraseRadius.value * 2 * canvasDrawWidth) / props.canvasWidth;
+  const size = (eraseRadius.value * 2 * rect.width) / props.canvasWidth;
   return {
     width: `${size}px`,
     height: `${size}px`,
@@ -205,7 +204,7 @@ const redrawCanvas = () => {
 };
 
 // キャンバス描画の初期化
-onMounted(() => {
+onMounted(async () => {
   ctx.value = canvasRef.value?.getContext("2d") || null;
 
   if (!ctx.value) {
@@ -213,16 +212,28 @@ onMounted(() => {
     return;
   }
 
+  // 画像をキャンバスサイズにリサイズ
+  const resizedDataURL = await resizeImageToCanvasSize(
+    props.imageObj.editedDataUrl,
+    props.canvasWidth,
+    props.canvasHeight
+  );
+
   originData.value = {
     ...props.imageObj,
+    editedDataUrl: resizedDataURL,
+    width: props.canvasWidth,
+    height: props.canvasHeight,
     erasePaths: [...props.imageObj.erasePaths],
   };
 
-  title.value = originData.value.title || CONSTANTS.DEFAULT_TITLE;
+  title.value = originData.value?.title || CONSTANTS.DEFAULT_TITLE;
 
   const { initCanvas } = useImageObject(ctx.value);
-  initCanvas(originData.value);
-  redrawCanvas(); // 修正した再描画関数を使用
+  if (originData.value) {
+    initCanvas(originData.value);
+    redrawCanvas(); // 修正した再描画関数を使用
+  }
 
   if (canvasRef.value) {
     startErase();
@@ -265,7 +276,15 @@ const saveEdits = async () => {
 
   const { updateEditedDataURL } = useImageObject(ctx.value);
   await updateEditedDataURL(originData.value);
-  emit("save", originData.value);
+
+  // リサイズ済みの画像データを確実に送信
+  const finalImageData = {
+    ...originData.value,
+    width: props.canvasWidth,
+    height: props.canvasHeight,
+  };
+
+  emit("save", finalImageData);
 };
 
 // モーダルを閉じる処理
@@ -305,26 +324,18 @@ const handleEraseMouse = (
   let clientY: number;
 
   if (event instanceof TouchEvent) {
-    clientX = event.touches[0].clientX;
-    clientY = event.touches[0].clientY;
+    const touch = event.touches[0] || event.changedTouches[0];
+    if (!touch) return;
+    clientX = touch.clientX;
+    clientY = touch.clientY;
   } else {
     clientX = event.clientX;
     clientY = event.clientY;
   }
 
-  // ボーダーを考慮した正確な座標計算
-  // getBoundingClientRect()にはボーダーが含まれるため、実際の描画領域を計算
-  const canvasDrawWidth = rect.width - CONSTANTS.CANVAS_BORDER_WIDTH * 2;
-  const canvasDrawHeight = rect.height - CONSTANTS.CANVAS_BORDER_WIDTH * 2;
-
-  const mouseX = Math.round(
-    ((clientX - rect.left - CONSTANTS.CANVAS_BORDER_WIDTH) / canvasDrawWidth) *
-      props.canvasWidth
-  );
-  const mouseY = Math.round(
-    ((clientY - rect.top - CONSTANTS.CANVAS_BORDER_WIDTH) / canvasDrawHeight) *
-      props.canvasHeight
-  );
+  // シンプルな座標変換
+  const mouseX = ((clientX - rect.left) / rect.width) * props.canvasWidth;
+  const mouseY = ((clientY - rect.top) / rect.height) * props.canvasHeight;
 
   handleErase(mouseX, mouseY, isNewPath);
 };
@@ -398,8 +409,8 @@ const startErase = () => {
   canvas.addEventListener("mouseout", handleMouseOut);
 
   // タッチイベントリスナーを追加
-  canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
-  canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+  canvas.addEventListener("touchstart", handleTouchStart);
+  canvas.addEventListener("touchmove", handleTouchMove);
   canvas.addEventListener("touchend", handleTouchEnd);
   canvas.addEventListener("touchcancel", handleTouchEnd);
 
@@ -444,6 +455,53 @@ const zoomOut = () => {
     scale.value = CONSTANTS.MIN_SCALE;
     redrawCanvas();
   }
+};
+
+// 画像をキャンバスサイズにリサイズするユーティリティ関数
+const resizeImageToCanvasSize = (
+  imageDataURL: string,
+  targetWidth: number,
+  targetHeight: number
+): Promise<string> => {
+  return new Promise((resolve) => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+
+    if (!ctx) {
+      resolve(imageDataURL); // フォールバック
+      return;
+    }
+
+    img.onload = () => {
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+
+      // アスペクト比を保持してリサイズ
+      const scale = Math.min(
+        targetWidth / img.width,
+        targetHeight / img.height
+      );
+      const scaledWidth = img.width * scale;
+      const scaledHeight = img.height * scale;
+      const x = (targetWidth - scaledWidth) / 2;
+      const y = (targetHeight - scaledHeight) / 2;
+
+      // 背景を透明にクリア
+      ctx.clearRect(0, 0, targetWidth, targetHeight);
+
+      // 画像を中央に配置してリサイズ
+      ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+
+      resolve(canvas.toDataURL("image/png"));
+    };
+
+    img.onerror = () => {
+      resolve(imageDataURL); // エラー時はオリジナルを返す
+    };
+
+    img.src = imageDataURL;
+  });
 };
 </script>
 

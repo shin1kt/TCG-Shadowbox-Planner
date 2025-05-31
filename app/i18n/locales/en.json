@@ -81,6 +81,10 @@
       "title": "3D View",
       "content": "In the 3D view tab, you can check how layers stack together.\nUse mouse or touch controls to change the viewpoint.\nYou can toggle the visibility of each layer to check part placement."
     },
+    "menu": {
+      "title": "Menu Functions",
+      "content": "Access various functions from the menu button (≡) in the top right corner:\n• Save Data: Save your current work as a JSON file\n• Load Data: Load a saved JSON file to resume work\n• Download PDF: Create a printable PDF file\n• Reset Screen: Clear all layers and edits"
+    },
     "export": {
       "title": "Export",
       "content": "When you're done editing, use the PDF Export button to create a printable PDF."

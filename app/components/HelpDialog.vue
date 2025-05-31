@@ -49,6 +49,13 @@
             ></v-list-item-title>
           </v-list-item>
 
+          <v-list-subheader>{{ t("help.menu.title") }}</v-list-subheader>
+          <v-list-item>
+            <v-list-item-title
+              v-html="t('help.menu.content')"
+            ></v-list-item-title>
+          </v-list-item>
+
           <v-list-subheader>{{ t("help.export.title") }}</v-list-subheader>
           <v-list-item>
             <v-list-item-title

@@ -20,6 +20,13 @@
     "layerEdit": "Layer Edit",
     "3dView": "3D View"
   },
+  "menu": {
+    "title": "Menu",
+    "saveData": "Save Data",
+    "loadData": "Load Data",
+    "downloadPDF": "Download PDF",
+    "reset": "Reset Screen"
+  },
   "canvas": {
     "eraserSize": "Eraser Size",
     "defaultTitle": "Image Editing (Transparency)"

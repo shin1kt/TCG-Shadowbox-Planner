@@ -1,54 +1,14 @@
 <template>
   <v-container>
-    <v-row>
-      <v-col cols="auto">
-        <v-btn
-          color="primary"
-          @click="exportToPDF"
-          :disabled="imageList.length === 0"
-          size="small"
-          density="compact"
-        >
-          {{ t("buttons.exportPDF") }}
-        </v-btn>
-        <v-btn
-          color="secondary"
-          class="ml-2"
-          @click="exportToJSON"
-          :disabled="imageList.length === 0"
-          size="small"
-          density="compact"
-        >
-          {{ t("buttons.exportJSON") }}
-        </v-btn>
-        <v-btn
-          color="info"
-          class="ml-2"
-          @click="triggerJSONImport"
-          size="small"
-          density="compact"
-        >
-          {{ t("buttons.importJSON") }}
-        </v-btn>
-        <input
-          ref="jsonFileInput"
-          type="file"
-          accept=".json"
-          style="display: none"
-          @change="handleJSONImport"
-        />
-        <v-btn
-          color="error"
-          class="ml-2"
-          @click="resetAll"
-          :disabled="imageList.length === 0"
-          size="small"
-          density="compact"
-        >
-          {{ t("buttons.reset") }}
-        </v-btn>
-      </v-col>
-    </v-row>
+    <!-- 隠しファイル入力 -->
+    <input
+      ref="jsonFileInput"
+      type="file"
+      accept=".json"
+      style="display: none"
+      @change="handleJSONImport"
+    />
+
     <v-row>
       <v-col>
         <FileUpload @upload="handleFileUpload" />
@@ -182,15 +142,14 @@ import type { ImageDataObject } from "@/types/imageData"; // 型をインポー�
 
 const { t } = useI18n();
 
-const imageList = ref<ImageDataObject[]>([]); // 画像オブジェクトの配列
+// グローバル状態の画像リストとメニュー機能を使用
+const { imageList, jsonFileInput, handleJSONImport } = useAppMenu();
+
 const modalOpen = ref(false); // モーダルの開閉状態
 const selectedIndex = ref<number>(-1);
 const activeTab = ref("grid");
 const selectedStackImages = ref<number[]>([]); // 選択されたレイヤーのインデックスを配列で管理
 const layeredImagesRef = ref<{ redraw: () => void } | null>(null);
-const jsonFileInput = ref<HTMLInputElement | null>(null);
-
-let jsPDF: any = null;
 
 // 画像リストの変更を監視
 watch(
@@ -325,75 +284,6 @@ const calculateCanvasSize = (imageObj: ImageDataObject) => {
   };
 };
 
-// PDFエクスポート機能
-const exportToPDF = async () => {
-  if (!jsPDF) {
-    const module = await import("jspdf");
-    jsPDF = module.jsPDF;
-  }
-
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "px",
-  });
-
-  for (let i = 0; i < imageList.value.length; i++) {
-    if (i > 0) {
-      pdf.addPage();
-    }
-
-    const img = imageList.value[i];
-    const imgData = img.editedDataUrl || img.img.src;
-
-    // ページサイズに合わせて画像のサイズを調整
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgRatio = img.height / img.width;
-
-    let imgWidth = pageWidth;
-    let imgHeight = imgWidth * imgRatio;
-
-    if (imgHeight > pageHeight) {
-      imgHeight = pageHeight;
-      imgWidth = imgHeight / imgRatio;
-    }
-
-    const x = (pageWidth - imgWidth) / 2;
-    const y = (pageHeight - imgHeight) / 2;
-
-    pdf.addImage(imgData, "JPEG", x, y, imgWidth, imgHeight);
-  }
-
-  // モバイルデバイスでの互換性を向上させるため、Blobを使用
-  try {
-    const pdfBlob = pdf.output("blob");
-    const blobUrl = URL.createObjectURL(pdfBlob);
-
-    // モバイルデバイスでの処理
-    if (
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      )
-    ) {
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = "layered-images.pdf";
-      link.click();
-
-      // 一定時間後にBlobURLを解放
-      setTimeout(() => {
-        URL.revokeObjectURL(blobUrl);
-      }, 100);
-    } else {
-      // デスクトップでの処理
-      pdf.save("layered-images.pdf");
-    }
-  } catch (error) {
-    console.error("PDF export failed:", error);
-    alert("PDFのエクスポートに失敗しました。もう一度お試しください。");
-  }
-};
-
 // レイヤーの選択状態をトグルする関数
 const toggleStackImage = (index: number) => {
   const currentIndex = selectedStackImages.value.indexOf(index);
@@ -404,15 +294,19 @@ const toggleStackImage = (index: number) => {
   }
 };
 
+// ローカルリセット処理（画面状態をリセット）
+const resetLocalState = () => {
+  selectedIndex.value = -1;
+  modalOpen.value = false;
+  activeTab.value = "grid";
+  selectedStackImages.value = []; // 選択状態もリセット
+};
+
+// グローバルのresetAllにローカル状態リセットを組み合わせ
+const { resetAll: globalResetAll } = useAppMenu();
 const resetAll = () => {
-  // 確認ダイアログを表示
-  if (window.confirm(t("confirm.reset"))) {
-    imageList.value = [];
-    selectedIndex.value = -1;
-    modalOpen.value = false;
-    activeTab.value = "grid";
-    selectedStackImages.value = []; // 選択状態もリセット
-  }
+  globalResetAll();
+  resetLocalState();
 };
 
 // 初期状態ですべてのレイヤーを選択状態に
@@ -426,144 +320,6 @@ const initializeSelectedImages = () => {
 onMounted(() => {
   initializeSelectedImages();
 });
-
-// JSONエクスポート機能
-const exportToJSON = async () => {
-  try {
-    // ファイル名を入力してもらう
-    const defaultName = `tcg-shadowbox-${
-      new Date().toISOString().split("T")[0]
-    }`;
-    const fileName = window.prompt(t("prompts.enterFileName"), defaultName);
-
-    // キャンセルされた場合は処理を中断
-    if (fileName === null) {
-      return;
-    }
-
-    // 空文字の場合はデフォルト名を使用
-    const finalFileName = fileName.trim() || defaultName;
-
-    // HTMLImageElementをBase64データURLに変換してJSONにシリアライズ可能にする
-    const exportData = await Promise.all(
-      imageList.value.map(async (imageData) => {
-        // 元の画像をCanvasに描画してBase64データURLを取得
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("Canvas context not available");
-
-        canvas.width = imageData.width;
-        canvas.height = imageData.height;
-        ctx.drawImage(imageData.img, 0, 0);
-        const originalDataUrl = canvas.toDataURL("image/png");
-
-        return {
-          width: imageData.width,
-          height: imageData.height,
-          erasePaths: imageData.erasePaths,
-          editedDataUrl: imageData.editedDataUrl,
-          title: imageData.title,
-          id: imageData.id,
-          originalDataUrl, // 元の画像データ
-        };
-      })
-    );
-
-    const jsonData = {
-      version: "1.0",
-      timestamp: new Date().toISOString(),
-      images: exportData,
-    };
-
-    const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    // .jsonが含まれていない場合は追加
-    link.download = finalFileName.endsWith(".json")
-      ? finalFileName
-      : `${finalFileName}.json`;
-    link.click();
-
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("JSON export failed:", error);
-    alert(t("errors.exportFailed"));
-  }
-};
-
-// JSONインポートのトリガー
-const triggerJSONImport = () => {
-  jsonFileInput.value?.click();
-};
-
-// JSONインポート処理
-const handleJSONImport = async (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
-
-  if (!file) return;
-
-  try {
-    const text = await file.text();
-    const jsonData = JSON.parse(text);
-
-    // バージョンチェック（将来的な互換性のため）
-    if (!jsonData.version) {
-      throw new Error("Invalid file format");
-    }
-
-    // 既存の画像がある場合は確認
-    if (imageList.value.length > 0) {
-      const shouldReplace = window.confirm(t("confirm.importReplace"));
-      if (!shouldReplace) {
-        target.value = ""; // ファイル選択をリセット
-        return;
-      }
-    }
-
-    // JSONデータからImageDataObjectを復元
-    const restoredImages = await Promise.all(
-      jsonData.images.map(async (imageData: any) => {
-        return new Promise<ImageDataObject>((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => {
-            resolve({
-              img,
-              width: imageData.width,
-              height: imageData.height,
-              erasePaths: imageData.erasePaths || [],
-              editedDataUrl: imageData.editedDataUrl || "",
-              title: imageData.title,
-              id: imageData.id,
-            });
-          };
-          img.onerror = () => {
-            reject(new Error(`Failed to load image: ${imageData.title}`));
-          };
-          img.src = imageData.originalDataUrl;
-        });
-      })
-    );
-
-    // 画像リストを更新
-    imageList.value = restoredImages;
-    selectedStackImages.value = Array.from(
-      { length: restoredImages.length },
-      (_, i) => i
-    );
-
-    alert(t("success.importComplete"));
-  } catch (error) {
-    console.error("JSON import failed:", error);
-    alert(t("errors.importFailed"));
-  } finally {
-    target.value = ""; // ファイル選択をリセット
-  }
-};
 </script>
 
 <style scoped>

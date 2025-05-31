@@ -108,5 +108,12 @@
   },
   "prompts": {
     "enterFileName": "エクスポートするファイル名を入力してください："
+  },
+  "menu": {
+    "title": "メニュー",
+    "saveData": "データの保存",
+    "loadData": "データの読み込み",
+    "downloadPDF": "PDFでダウンロード",
+    "reset": "画面をリセット"
   }
 }

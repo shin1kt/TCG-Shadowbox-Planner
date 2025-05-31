@@ -22,7 +22,7 @@
             v-bind="props"
             icon="mdi-magnify-plus"
             size="small"
-            :disabled="scale === 2"
+            :disabled="scale === CONSTANTS.MAX_SCALE"
             @click="zoomIn"
             class="zoom-button ml-2"
             :aria-label="t('imageCanvas.zoomIn')"
@@ -41,7 +41,7 @@
             v-bind="props"
             icon="mdi-magnify-minus"
             size="small"
-            :disabled="scale === 1"
+            :disabled="scale === CONSTANTS.MIN_SCALE"
             @click="zoomOut"
             class="zoom-button ml-2"
             :aria-label="t('imageCanvas.zoomOut')"
@@ -129,6 +129,17 @@ import { useImageObject } from "@/composables/useImageObject";
 
 const { t } = useI18n();
 
+// 定数の定義
+const CONSTANTS = {
+  DEFAULT_ERASE_SIZE: "20px",
+  CANVAS_BORDER_WIDTH: 1,
+  DEFAULT_ERASE_RADIUS: 10,
+  MAX_SCALE: 2,
+  MIN_SCALE: 1,
+  DEFAULT_SCALE: 1,
+  DEFAULT_TITLE: "Image Editing (Transparency)",
+} as const;
+
 const props = defineProps<{
   imageObj: ImageDataObject; // 画像オブジェクトを受け取る
   canvasWidth: number;
@@ -145,24 +156,27 @@ const title = ref("");
 const originData = ref<ImageDataObject | null>(null); // 元の画像データを保持
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const ctx = ref<CanvasRenderingContext2D | null>(null);
-const eraseRadius = ref(10); // 消去サイズの初期値
+const eraseRadius = ref(CONSTANTS.DEFAULT_ERASE_RADIUS); // 消去サイズの初期値
 const eraseSizeRef = ref<HTMLDivElement | null>(null); // 消去サイズの表示用
 const isErasing = ref(false); // マウスボタンが押されているかどうかを追跡
 
 const undoCounts = ref<number[]>([]);
 const currentEraseCount = ref(0); // 現在の消去作業のカウントを保持する変数を追加
 
-const scale = ref(1);
+const scale = ref<number>(CONSTANTS.DEFAULT_SCALE);
 
 const isEraseMode = ref(true); // デフォルトで消去モードON
 
 // 動的な削除サイズのスタイルのみを計算
 const eraseSizeStyle = computed(() => {
-  if (!canvasRef.value) return { width: "20px", height: "20px" };
+  if (!canvasRef.value)
+    return {
+      width: CONSTANTS.DEFAULT_ERASE_SIZE,
+      height: CONSTANTS.DEFAULT_ERASE_SIZE,
+    };
 
   const rect = canvasRef.value.getBoundingClientRect();
-  const borderWidth = 1; // CSSで設定されたボーダー幅
-  const canvasDrawWidth = rect.width - borderWidth * 2;
+  const canvasDrawWidth = rect.width - CONSTANTS.CANVAS_BORDER_WIDTH * 2;
   const size = (eraseRadius.value * 2 * canvasDrawWidth) / props.canvasWidth;
   return {
     width: `${size}px`,
@@ -204,7 +218,7 @@ onMounted(() => {
     erasePaths: [...props.imageObj.erasePaths],
   };
 
-  title.value = originData.value.title || "Image Editing (Transparency)";
+  title.value = originData.value.title || CONSTANTS.DEFAULT_TITLE;
 
   const { initCanvas } = useImageObject(ctx.value);
   initCanvas(originData.value);
@@ -300,15 +314,16 @@ const handleEraseMouse = (
 
   // ボーダーを考慮した正確な座標計算
   // getBoundingClientRect()にはボーダーが含まれるため、実際の描画領域を計算
-  const borderWidth = 1; // CSSで設定されたボーダー幅
-  const canvasDrawWidth = rect.width - borderWidth * 2;
-  const canvasDrawHeight = rect.height - borderWidth * 2;
+  const canvasDrawWidth = rect.width - CONSTANTS.CANVAS_BORDER_WIDTH * 2;
+  const canvasDrawHeight = rect.height - CONSTANTS.CANVAS_BORDER_WIDTH * 2;
 
   const mouseX = Math.round(
-    ((clientX - rect.left - borderWidth) / canvasDrawWidth) * props.canvasWidth
+    ((clientX - rect.left - CONSTANTS.CANVAS_BORDER_WIDTH) / canvasDrawWidth) *
+      props.canvasWidth
   );
   const mouseY = Math.round(
-    ((clientY - rect.top - borderWidth) / canvasDrawHeight) * props.canvasHeight
+    ((clientY - rect.top - CONSTANTS.CANVAS_BORDER_WIDTH) / canvasDrawHeight) *
+      props.canvasHeight
   );
 
   handleErase(mouseX, mouseY, isNewPath);
@@ -418,15 +433,15 @@ const updateTitle = (newTitle: string) => {
 };
 
 const zoomIn = () => {
-  if (scale.value < 2) {
-    scale.value = 2;
+  if (scale.value < CONSTANTS.MAX_SCALE) {
+    scale.value = CONSTANTS.MAX_SCALE;
     redrawCanvas();
   }
 };
 
 const zoomOut = () => {
-  if (scale.value > 1) {
-    scale.value = 1;
+  if (scale.value > CONSTANTS.MIN_SCALE) {
+    scale.value = CONSTANTS.MIN_SCALE;
     redrawCanvas();
   }
 };

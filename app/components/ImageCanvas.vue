@@ -9,7 +9,7 @@
         :aria-label="
           isEraseMode ? t('buttons.eraseMode') : t('buttons.moveMode')
         "
-        >{{ isEraseMode ? "編集中4" : "移動" }}
+        >{{ isEraseMode ? "編集中" : "移動" }}
       </v-btn>
 
       <v-tooltip

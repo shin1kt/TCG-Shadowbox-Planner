@@ -156,23 +156,17 @@ const scale = ref(1);
 
 const isEraseMode = ref(true); // デフォルトで消去モードON
 
-// キャンバスの実際のサイズと表示サイズの比率を計算
-const canvasScale = computed(() => {
-  if (!canvasRef.value || !originData.value) return { scaleX: 1, scaleY: 1 };
-
-  const rect = canvasRef.value.getBoundingClientRect();
-  return {
-    scaleX: (originData.value.width * scale.value) / rect.width,
-    scaleY: (originData.value.height * scale.value) / rect.height,
-  };
-});
-
 // 動的な削除サイズのスタイルのみを計算
 const eraseSizeStyle = computed(() => {
-  const size = eraseRadius.value / canvasScale.value.scaleX;
+  if (!canvasRef.value) return { width: "20px", height: "20px" };
+
+  const rect = canvasRef.value.getBoundingClientRect();
+  const borderWidth = 1; // CSSで設定されたボーダー幅
+  const canvasDrawWidth = rect.width - borderWidth * 2;
+  const size = (eraseRadius.value * 2 * canvasDrawWidth) / props.canvasWidth;
   return {
-    width: `${size * 2}px`,
-    height: `${size * 2}px`,
+    width: `${size}px`,
+    height: `${size}px`,
   } as const;
 });
 
@@ -304,11 +298,18 @@ const handleEraseMouse = (
     clientY = event.clientY;
   }
 
-  // スケールを考慮した座標計算
-  const mouseX =
-    ((clientX - rect.left) * canvasScale.value.scaleX) / scale.value;
-  const mouseY =
-    ((clientY - rect.top) * canvasScale.value.scaleY) / scale.value;
+  // ボーダーを考慮した正確な座標計算
+  // getBoundingClientRect()にはボーダーが含まれるため、実際の描画領域を計算
+  const borderWidth = 1; // CSSで設定されたボーダー幅
+  const canvasDrawWidth = rect.width - borderWidth * 2;
+  const canvasDrawHeight = rect.height - borderWidth * 2;
+
+  const mouseX = Math.round(
+    ((clientX - rect.left - borderWidth) / canvasDrawWidth) * props.canvasWidth
+  );
+  const mouseY = Math.round(
+    ((clientY - rect.top - borderWidth) / canvasDrawHeight) * props.canvasHeight
+  );
 
   handleErase(mouseX, mouseY, isNewPath);
 };

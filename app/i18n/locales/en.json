@@ -5,6 +5,8 @@
   },
   "buttons": {
     "exportPDF": "Export PDF",
+    "exportJSON": "Export JSON",
+    "importJSON": "Import JSON",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -94,6 +96,17 @@
     "showChangelog": "Show Changelog"
   },
   "confirm": {
-    "reset": "Are you sure you want to reset all images and edits?"
+    "reset": "Are you sure you want to reset all images and edits?",
+    "importReplace": "Are you sure you want to discard current work and replace with imported content?"
+  },
+  "errors": {
+    "exportFailed": "Export failed. Please try again.",
+    "importFailed": "Import failed. Please check if the file format is correct."
+  },
+  "success": {
+    "importComplete": "Import completed successfully."
+  },
+  "prompts": {
+    "enterFileName": "Enter the file name for export:"
   }
 }

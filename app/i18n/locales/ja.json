@@ -5,6 +5,8 @@
   },
   "buttons": {
     "exportPDF": "PDFエクスポート",
+    "exportJSON": "JSONエクスポート",
+    "importJSON": "JSONインポート",
     "save": "保存",
     "cancel": "キャンセル",
     "delete": "削除",
@@ -94,6 +96,17 @@
     "showChangelog": "変更履歴を表示"
   },
   "confirm": {
-    "reset": "すべての画像と編集内容をリセットしますか？"
+    "reset": "すべての画像と編集内容をリセットしますか？",
+    "importReplace": "現在の作業内容を破棄して、インポートした内容に置き換えますか？"
+  },
+  "errors": {
+    "exportFailed": "エクスポートに失敗しました。もう一度お試しください。",
+    "importFailed": "インポートに失敗しました。ファイルの形式が正しいか確認してください。"
+  },
+  "success": {
+    "importComplete": "インポートが完了しました。"
+  },
+  "prompts": {
+    "enterFileName": "エクスポートするファイル名を入力してください："
   }
 }

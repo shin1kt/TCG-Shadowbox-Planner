@@ -5,6 +5,8 @@
   },
   "buttons": {
     "exportPDF": "Export PDF",
+    "exportJSON": "Export JSON",
+    "importJSON": "Import JSON",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -17,6 +19,13 @@
   "tabs": {
     "layerEdit": "Layer Edit",
     "3dView": "3D View"
+  },
+  "menu": {
+    "title": "Menu",
+    "saveData": "Save Data",
+    "loadData": "Load Data",
+    "downloadPDF": "Download PDF",
+    "reset": "Reset Screen"
   },
   "canvas": {
     "eraserSize": "Eraser Size",
@@ -72,6 +81,10 @@
       "title": "3D View",
       "content": "In the 3D view tab, you can check how layers stack together.\nUse mouse or touch controls to change the viewpoint.\nYou can toggle the visibility of each layer to check part placement."
     },
+    "menu": {
+      "title": "Menu Functions",
+      "content": "Access various functions from the menu button (≡) in the top right corner:\n• Save Data: Save your current work as a JSON file\n• Load Data: Load a saved JSON file to resume work\n• Download PDF: Create a printable PDF file\n• Reset Screen: Clear all layers and edits"
+    },
     "export": {
       "title": "Export",
       "content": "When you're done editing, use the PDF Export button to create a printable PDF."
@@ -94,6 +107,17 @@
     "showChangelog": "Show Changelog"
   },
   "confirm": {
-    "reset": "Are you sure you want to reset all images and edits?"
+    "reset": "Are you sure you want to reset all images and edits?",
+    "importReplace": "Are you sure you want to discard current work and replace with imported content?"
+  },
+  "errors": {
+    "exportFailed": "Export failed. Please try again.",
+    "importFailed": "Import failed. Please check if the file format is correct."
+  },
+  "success": {
+    "importComplete": "Import completed successfully."
+  },
+  "prompts": {
+    "enterFileName": "Enter the file name for export:"
   }
 }

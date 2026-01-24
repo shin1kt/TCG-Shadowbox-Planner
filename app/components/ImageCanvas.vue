@@ -261,7 +261,7 @@ const handleErase = (
 
   if (!originData.value) return;
   erase(originData.value, mouseX, mouseY, eraseRadius.value, isNewPath);
-  redrawCanvas(); // 修正した再描画関数を使用
+  redrawCanvas();
 };
 
 // Undo処理の後の再描画を修正
@@ -277,7 +277,7 @@ const undo = (count: number = 1) => {
   undoCounts.value = undoCounts.value.slice(0, length - count);
 
   undo(originData.value, undoCountsSum);
-  redrawCanvas(); // 修正した再描画関数を使用
+  redrawCanvas();
 };
 
 // 編集後の画像を親コンポーネントに返す
@@ -328,19 +328,27 @@ const handleEraseMouse = (
   if (!isEraseMode.value || !isErasing.value) return;
 
   const rect = canvasRef.value?.getBoundingClientRect();
-  if (!rect || !ctx.value || !originData.value) return;
+  if (!rect || !ctx.value || !originData.value) {
+    return;
+  }
 
   let clientX: number;
   let clientY: number;
 
-  if (event instanceof TouchEvent) {
-    const touch = event.touches[0] || event.changedTouches[0];
+  // Safariでは TouchEvent がグローバルに存在しない場合があるため、
+  // event.type でタッチイベントかどうかを判定
+  const isTouchEvent = event.type.startsWith("touch");
+
+  if (isTouchEvent) {
+    const touchEvent = event as TouchEvent;
+    const touch = touchEvent.touches[0] || touchEvent.changedTouches[0];
     if (!touch) return;
     clientX = touch.clientX;
     clientY = touch.clientY;
   } else {
-    clientX = event.clientX;
-    clientY = event.clientY;
+    const mouseEvent = event as MouseEvent;
+    clientX = mouseEvent.clientX;
+    clientY = mouseEvent.clientY;
   }
 
   // シンプルな座標変換
@@ -350,32 +358,32 @@ const handleEraseMouse = (
   handleErase(mouseX, mouseY, isNewPath);
 };
 
-// 高階関数でガード節を共通化
-const withEraseModeGuard = (handler: Function) => (event?: any) => {
-  if (!isEraseMode.value) return;
-  handler(event);
-};
-
 // マウスダウン・マウスムーブ・マウスアップイベントで消去処理を行う
 const startErase = () => {
   if (!canvasRef.value) return;
 
   const canvas = canvasRef.value;
 
-  const handleMouseDown = withEraseModeGuard((event: MouseEvent) => {
+  const handleMouseDown = (event: MouseEvent) => {
+    if (!isEraseMode.value) return;
+    event.preventDefault();
+    event.stopPropagation();
     isErasing.value = true;
     handleEraseMouse(event, true);
     currentEraseCount.value = 1;
-  });
+  };
 
-  const handleMouseMove = withEraseModeGuard((event: MouseEvent) => {
+  const handleMouseMove = (event: MouseEvent) => {
+    if (!isEraseMode.value) return;
     if (isErasing.value) {
+      event.preventDefault();
       handleEraseMouse(event, false);
       currentEraseCount.value++;
     }
-  });
+  };
 
   const handleEndErase = () => {
+    if (!isEraseMode.value && !isErasing.value) return;
     isErasing.value = false;
     if (currentEraseCount.value > 0) {
       undoCounts.value.push(currentEraseCount.value);
@@ -383,8 +391,15 @@ const startErase = () => {
     currentEraseCount.value = 0;
   };
 
-  const handleMouseUp = withEraseModeGuard(handleEndErase);
-  const handleMouseOut = withEraseModeGuard(handleEndErase);
+  const handleMouseUp = (event: MouseEvent) => {
+    handleEndErase();
+  };
+
+  const handleDocumentMouseUp = (event: MouseEvent) => {
+    if (isErasing.value) {
+      handleEndErase();
+    }
+  };
 
   const handleTouchStart = (event: TouchEvent) => {
     if (!isEraseMode.value) return;
@@ -413,23 +428,27 @@ const startErase = () => {
   };
 
   // マウスイベントリスナーを追加
-  canvas.addEventListener("mousedown", handleMouseDown);
-  canvas.addEventListener("mousemove", handleMouseMove);
-  canvas.addEventListener("mouseup", handleMouseUp);
-  canvas.addEventListener("mouseout", handleMouseOut);
+  canvas.addEventListener("mousedown", handleMouseDown, { passive: false });
+  canvas.addEventListener("mousemove", handleMouseMove, { passive: false });
+  canvas.addEventListener("mouseup", handleMouseUp, { passive: false });
+
+  // documentレベルでmouseupを監視（キャンバス外でマウスを離した場合にも対応）
+  document.addEventListener("mouseup", handleDocumentMouseUp, {
+    passive: false,
+  });
 
   // タッチイベントリスナーを追加
-  canvas.addEventListener("touchstart", handleTouchStart);
-  canvas.addEventListener("touchmove", handleTouchMove);
-  canvas.addEventListener("touchend", handleTouchEnd);
-  canvas.addEventListener("touchcancel", handleTouchEnd);
+  canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+  canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+  canvas.addEventListener("touchend", handleTouchEnd, { passive: false });
+  canvas.addEventListener("touchcancel", handleTouchEnd, { passive: false });
 
   // コンポーネントのクリーンアップ時にイベントリスナーを削除
   onUnmounted(() => {
     canvas.removeEventListener("mousedown", handleMouseDown);
     canvas.removeEventListener("mousemove", handleMouseMove);
     canvas.removeEventListener("mouseup", handleMouseUp);
-    canvas.removeEventListener("mouseout", handleMouseOut);
+    document.removeEventListener("mouseup", handleDocumentMouseUp);
 
     canvas.removeEventListener("touchstart", handleTouchStart);
     canvas.removeEventListener("touchmove", handleTouchMove);

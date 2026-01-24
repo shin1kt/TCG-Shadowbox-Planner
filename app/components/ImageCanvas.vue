@@ -87,11 +87,12 @@
             ref="canvasRef"
             :width="canvasWidth"
             :height="canvasHeight"
-            :class="['checkered-background', { 'erase-cursor': isEraseMode }]"
+            class="checkered-background"
             :style="{
               width: `${canvasWidth * scale}px`,
               height: `${canvasHeight * scale}px`,
               display: 'block',
+              cursor: cursorStyle,
             }"
           ></canvas>
         </div>
@@ -183,6 +184,15 @@ const eraseSizeStyle = computed(() => {
   } as const;
 });
 
+// 動的なカーソルスタイル
+const cursorStyle = computed(() => {
+  if (!isEraseMode.value) return "";
+
+  const size = eraseRadius.value * 2 * scale.value;
+  const svg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'%3E%3Ccircle cx='${size / 2}' cy='${size / 2}' r='${size / 2}' fill='rgba(0, 0, 0, 0.5)' /%3E%3C/svg%3E`;
+  return `url("${svg}") ${size / 2} ${size / 2}, auto`;
+});
+
 // キャンバスの背景パターンを描画
 const drawBackground = () => {
   if (!ctx.value || !canvasRef.value) return;
@@ -216,7 +226,7 @@ onMounted(async () => {
   const resizedDataURL = await resizeImageToCanvasSize(
     props.imageObj.editedDataUrl,
     props.canvasWidth,
-    props.canvasHeight
+    props.canvasHeight,
   );
 
   originData.value = {
@@ -244,7 +254,7 @@ onMounted(async () => {
 const handleErase = (
   mouseX: number,
   mouseY: number,
-  isNewPath: boolean = false
+  isNewPath: boolean = false,
 ) => {
   if (!ctx.value) return;
   const { erase } = useImageObject(ctx.value);
@@ -302,7 +312,7 @@ watch(
       if (!originData.value) return; // 元データが存在しない場合は処理を中止
       redraw(originData.value); // 再描画
     }
-  }
+  },
 );
 
 // 消去モードの切り替え
@@ -313,7 +323,7 @@ const toggleEraseMode = () => {
 // キャンバスの消去処理（クリックした部分を透過）
 const handleEraseMouse = (
   event: MouseEvent | TouchEvent,
-  isNewPath: boolean = false
+  isNewPath: boolean = false,
 ) => {
   if (!isEraseMode.value || !isErasing.value) return;
 
@@ -470,7 +480,7 @@ const zoomOut = () => {
 const resizeImageToCanvasSize = (
   imageDataURL: string,
   targetWidth: number,
-  targetHeight: number
+  targetHeight: number,
 ): Promise<string> => {
   return new Promise((resolve) => {
     const canvas = document.createElement("canvas");
@@ -489,7 +499,7 @@ const resizeImageToCanvasSize = (
       // アスペクト比を保持してリサイズ
       const scale = Math.min(
         targetWidth / img.width,
-        targetHeight / img.height
+        targetHeight / img.height,
       );
       const scaledWidth = img.width * scale;
       const scaledHeight = img.height * scale;
@@ -521,10 +531,6 @@ canvas {
 }
 canvas.checkered-background {
   background-color: transparent !important;
-}
-.erase-cursor {
-  cursor: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"%3E%3Ccircle cx="25" cy="25" r="25" fill="rgba(0, 0, 0, 0.5)" /%3E%3C/svg%3E'),
-    auto;
 }
 .canvas-container {
   overflow: hidden;

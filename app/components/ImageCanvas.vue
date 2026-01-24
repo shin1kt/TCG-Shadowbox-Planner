@@ -588,6 +588,14 @@ canvas.checkered-background {
   background-color: rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
+/* PC表示の場合のみ中心起点にする */
+@media (hover: hover) and (pointer: fine) {
+  .erase-size-preview {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
 .zoom-button,
 .erase-mode-button,
 .undo-button {

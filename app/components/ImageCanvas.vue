@@ -336,8 +336,8 @@ const handleEraseMouse = (
   let clientY: number;
 
   // Safariでは TouchEvent がグローバルに存在しない場合があるため、
-  // event.type でタッチイベントかどうかを判定
-  const isTouchEvent = event.type.startsWith("touch");
+  // touches プロパティの存在でタッチイベントかどうかを判定
+  const isTouchEvent = "touches" in event;
 
   if (isTouchEvent) {
     const touchEvent = event as TouchEvent;
@@ -367,7 +367,6 @@ const startErase = () => {
   const handleMouseDown = (event: MouseEvent) => {
     if (!isEraseMode.value) return;
     event.preventDefault();
-    event.stopPropagation();
     isErasing.value = true;
     handleEraseMouse(event, true);
     currentEraseCount.value = 1;
@@ -383,7 +382,7 @@ const startErase = () => {
   };
 
   const handleEndErase = () => {
-    if (!isEraseMode.value && !isErasing.value) return;
+    if (!isErasing.value) return;
     isErasing.value = false;
     if (currentEraseCount.value > 0) {
       undoCounts.value.push(currentEraseCount.value);
@@ -430,24 +429,24 @@ const startErase = () => {
   // マウスイベントリスナーを追加
   canvas.addEventListener("mousedown", handleMouseDown, { passive: false });
   canvas.addEventListener("mousemove", handleMouseMove, { passive: false });
-  canvas.addEventListener("mouseup", handleMouseUp, { passive: false });
+  canvas.addEventListener("mouseup", handleMouseUp);
+  canvas.addEventListener("mouseleave", handleEndErase);
 
   // documentレベルでmouseupを監視（キャンバス外でマウスを離した場合にも対応）
-  document.addEventListener("mouseup", handleDocumentMouseUp, {
-    passive: false,
-  });
+  document.addEventListener("mouseup", handleDocumentMouseUp);
 
   // タッチイベントリスナーを追加
   canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
   canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
-  canvas.addEventListener("touchend", handleTouchEnd, { passive: false });
-  canvas.addEventListener("touchcancel", handleTouchEnd, { passive: false });
+  canvas.addEventListener("touchend", handleTouchEnd);
+  canvas.addEventListener("touchcancel", handleTouchEnd);
 
   // コンポーネントのクリーンアップ時にイベントリスナーを削除
   onUnmounted(() => {
     canvas.removeEventListener("mousedown", handleMouseDown);
     canvas.removeEventListener("mousemove", handleMouseMove);
     canvas.removeEventListener("mouseup", handleMouseUp);
+    canvas.removeEventListener("mouseleave", handleEndErase);
     document.removeEventListener("mouseup", handleDocumentMouseUp);
 
     canvas.removeEventListener("touchstart", handleTouchStart);

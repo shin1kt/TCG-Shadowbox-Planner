@@ -113,6 +113,11 @@
   "prompts": {
     "enterFileName": "エクスポートするファイル名を入力してください："
   },
+  "announcement": {
+    "cloudRelease": "TCG Shadowbox Planner のクラウド版がリリースされました。こちらからご利用いただけます。\nhttps://www.tcg-shadowbox.app/",
+    "aria": "クラウド版サイトを開く",
+    "close": "お知らせを閉じる"
+  },
   "menu": {
     "title": "メニュー",
     "saveData": "データの保存",

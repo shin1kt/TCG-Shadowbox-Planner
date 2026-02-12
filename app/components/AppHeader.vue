@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar>
+  <v-app-bar extended>
     <v-container class="d-flex align-center">
       <v-app-bar-title>{{ t("header.title") }}</v-app-bar-title>
       <v-spacer></v-spacer>
@@ -35,6 +35,44 @@
       </v-btn>
       <HelpDialog v-model="dialog" />
     </v-container>
+
+    <template #extension>
+      <ClientOnly>
+        <div
+          v-if="showAnnouncement"
+          class="announcement-link"
+          role="link"
+          tabindex="0"
+          :aria-label="t('announcement.aria')"
+          @click="openCloud"
+          @keydown.enter.prevent="openCloud"
+          @keydown.space.prevent="openCloud"
+        >
+          <v-alert
+            class="announcement-alert rounded-0 ma-0"
+            density="compact"
+            variant="flat"
+            color="primary"
+            icon="mdi-information-outline"
+          >
+            <template #append>
+              <v-btn
+                icon="mdi-close"
+                variant="text"
+                size="small"
+                class="announcement-close"
+                :aria-label="t('announcement.close')"
+                @click.stop="dismissAnnouncement"
+              />
+            </template>
+
+            <span class="announcement-text">{{
+              t("announcement.cloudRelease")
+            }}</span>
+          </v-alert>
+        </div>
+      </ClientOnly>
+    </template>
   </v-app-bar>
 
   <!-- ドロアーメニュー -->
@@ -106,6 +144,18 @@ import HelpDialog from "./HelpDialog.vue";
 const dialog = ref(false);
 const { t, locale, locales } = useI18n();
 
+const cloudUrl = "https://www.tcg-shadowbox.app/";
+
+const showAnnouncement = ref(true);
+
+const openCloud = () => {
+  window.location.href = cloudUrl;
+};
+
+const dismissAnnouncement = () => {
+  showAnnouncement.value = false;
+};
+
 // アプリメニューの機能をインポート
 const {
   isMenuOpen,
@@ -139,5 +189,28 @@ const switchLanguage = (code: LocaleCode) => {
 
 .v-app-bar {
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.announcement-link {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+}
+
+.announcement-alert {
+  background-color: rgb(var(--v-theme-primary)) !important;
+  color: rgb(var(--v-theme-on-primary)) !important;
+}
+
+.announcement-alert :deep(.v-icon) {
+  color: inherit;
+}
+
+.announcement-text {
+  white-space: pre-line;
+}
+
+.announcement-close {
+  color: inherit;
 }
 </style>

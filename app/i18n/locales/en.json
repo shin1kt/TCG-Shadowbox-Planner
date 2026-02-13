@@ -119,5 +119,10 @@
   },
   "prompts": {
     "enterFileName": "Enter the file name for export:"
+  },
+  "announcement": {
+    "cloudRelease": "The cloud version of TCG Shadowbox Planner has been released.\nhttps://www.tcg-shadowbox.app/",
+    "aria": "Open the cloud version website",
+    "close": "Dismiss announcement"
   }
 }
